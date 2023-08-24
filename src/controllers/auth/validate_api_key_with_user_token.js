@@ -1,28 +1,31 @@
-const configs = require('../../configs/server');
+const configs = require("../../configs/server");
+const crypto = require("crypto");
 
-export function verifyApiKeyWithUserAuthToken(req, res) {
-    const secretKey = configs.cipherSecretKey;
-    
-    const encryptedToken = '...';
-    const userAuthToken = '...';
+module.exports = function verifyApiKeyWithUserAuthToken(req, res) {
+  const { apiKey, userAuthToken } = req.body;
 
-    const decipher = crypto.createDecipher('aes-256-ctr', secretKey);
+  try {
+    const decipher = crypto.createDecipheriv(
+      "aes-256-cbc",
+      configs.cipherSecretKey,
+      configs.serverInitVector
+    );
 
-    let decryptedAuthToken = decipher.update(encryptedToken, 'hex', 'utf8'); 
-    decryptedAuthToken += decipher.final('utf8');
- 
-    console.log('Decrypted Auth Token:', decryptedAuthToken);
+    let decryptedApiKey = decipher.update(apiKey, "hex", "utf8");
+    decryptedApiKey += decipher.final("utf8");
 
-if (decryptedAuthToken === userAuthToken) {
-  res.status(200).json({
-    is_valid: true,
-    message: 'API Key is valid'  
-});
-
-} else {
+    if (decryptedApiKey === userAuthToken) {
+      res.status(200).json({
+        message: "Valid API key",
+      });
+    } else {
+      res.status(401).json({
+        message: "Invalid API key",
+      });
+    }
+  } catch (error) {
     res.status(401).json({
-        is_valid: false,
-        message: 'API Key is invalid'
+      message: "Invalid API key",
     });
-}
-}
+  }
+};
