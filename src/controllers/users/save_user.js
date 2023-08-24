@@ -1,12 +1,15 @@
-const database = require('../../controllers/database/add_data');
-export function saveUser(req, res) {
+const insertToDb = require("../../controllers/database/insert");
 
-     const { tokenFromProvider } = req.body;
+export async function saveUser(req, res) {
+  const { tokenFromProvider } = req.body;
 
-        if (!tokenFromProvider) { 
-            return res.status(400).json({ error: 'Token not found' });
-        }  else {
-            //  const addUserToDatabase = 
+  if (!tokenFromProvider) {
+    return res.status(400).json({ error: "Token not found" });
+  } else {
+    const addUserToDatabase = await insertToDb("db", "users", { ...body });
 
-        }
+    return res
+      .status(200)
+      .json({ message: "User added to database", userData: addUserToDatabase });
+  }
 }

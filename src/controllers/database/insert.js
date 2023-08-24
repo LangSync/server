@@ -1,6 +1,6 @@
 const client = require("./client");
 
-export function insert(
+module.exports =  function insert(
     databaseName,
     collectionName,
     document

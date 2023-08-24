@@ -8,5 +8,6 @@ export function read(
     return client
         .db(databaseName)
         .collection(collectionName)
+
         .findOne(document);
     }
