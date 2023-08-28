@@ -1,8 +1,20 @@
 const configs = require("../../configs/server");
 const crypto = require("crypto");
+const Joi = require("joi");
 
 module.exports = function verifyApiKeyWithUserAuthToken(req, res) {
-  const { apiKey, userAuthToken } = req.body;
+  let schema = Joi.object({
+    apiKey: Joi.string().min(2).required(),
+    userAuthToken: Joi.string().min(2).required(),
+  });
+
+  let { error, value } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
+  const { apiKey, userAuthToken } = value;
 
   try {
     const decipher = crypto.createDecipheriv(

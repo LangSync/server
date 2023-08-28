@@ -17,7 +17,7 @@ module.exports = async function save_partitioned_json_of_user(req, res) {
     const idForThisPartitionedJson = v4();
 
     const doc = {
-      userToken: userToken,
+      userAuthToken: userToken,
       userId: userId,
       jsonAsParts: jsonAsParts,
       createdAt: new Date().toISOString(),

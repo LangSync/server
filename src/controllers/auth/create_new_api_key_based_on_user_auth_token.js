@@ -1,8 +1,19 @@
 const configs = require("../../configs/server");
 const crypto = require("crypto");
+const Joi = require("joi");
 
 module.exports = function createNewApiKeyBasedOnUserAuthToken(req, res) {
-  const { userAuthToken } = req.body;
+  let schema = Joi.object({
+    userAuthToken: Joi.string().min(2).required(),
+  });
+
+  let { error, value } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
+  let { userAuthToken } = value;
 
   const cipher = crypto.createCipheriv(
     "aes-256-cbc",

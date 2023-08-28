@@ -17,6 +17,7 @@ rtr.post(
   upload.single("uploadedJsonFile"),
   savePartitionedJsonOfUser
 );
+
 rtr.post("/process-translation", processTranslations);
 
 module.exports = rtr;
