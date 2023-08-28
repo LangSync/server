@@ -3,11 +3,9 @@ let path = require("path");
 const e = require("express");
 const { getEncoding } = require("js-tiktoken");
 
-let maxTokens = 450;
-
 const enc = getEncoding("gpt2");
 
-function json_tiktoken_separator(parsedJson) {
+function json_tiktoken_separator(parsedJson, maxTokens = 4096) {
   let parts = [];
 
   let latestPart = "";
@@ -21,16 +19,16 @@ function json_tiktoken_separator(parsedJson) {
 
     let entry = `${key}: ${value}`;
 
-    console.log("start iteration of " + entry);
+    // console.log("start iteration of " + entry);
 
     let encoded = enc.encode(entry);
 
-    console.log("encoded: " + encoded);
-    console.log("encoded length: " + encoded.length);
+    // console.log("encoded: " + encoded);
+    // console.log("encoded length: " + encoded.length);
 
     let tokensSum = encoded.length + latestPartTokens;
 
-    console.log("tokens sum: " + tokensSum);
+    // console.log("tokens sum: " + tokensSum);
 
     if (tokensSum >= maxTokens) {
       parts.push(latestPart + "\n\n\n\n\n");
@@ -55,12 +53,7 @@ function json_tiktoken_separator(parsedJson) {
     }
   }
 
-  fs.writeFileSync(
-    path.resolve(__dirname, "../../../parts.txt"),
-    parts.join("\n\n")
-  );
+  return parts;
 }
 
-json_tiktoken_separator(
-  JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../../sample.json")))
-);
+module.exports = json_tiktoken_separator;
