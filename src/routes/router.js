@@ -4,7 +4,7 @@ const createApiKey = require("../controllers/auth/create_new_api_key_based_on_us
 const verifyApiKeyWithUserAuthToken = require("../controllers/auth/validate_api_key_with_user_token");
 const saveUser = require("../controllers/users/save_user");
 const savePartitionedJsonOfUser = require("../controllers/users/save_partitioned_json_of_user");
-const processTranslations = require("../translate/process_translations");
+const processTranslations = require("../controllers/translate/process_translations");
 
 const multer = require("multer");
 var upload = multer({ dest: "uploads/" });

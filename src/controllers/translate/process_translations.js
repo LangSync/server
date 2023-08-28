@@ -7,7 +7,15 @@ const openai = new OpenAI({
 });
 
 module.exports = async function processTranslations(req, res) {
-  const { jsonPartitionsId } = req.body;
-  const filterDoc = { _id: jsonPartitionsId };
-  const partitionsDoc = await read("db", "jsonPartitions");
+  try {
+    const { jsonPartitionsId } = req.body;
+    const filterDoc = { partitionId: jsonPartitionsId };
+    const partitionsDoc = await read("db", "jsonPartitions", filterDoc);
+
+    console.log("partitionsDoc", partitionsDoc);
+
+    res.status(200).json({ partitionsDoc });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };

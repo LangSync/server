@@ -8,9 +8,13 @@ const router = require("./routes/router");
 
 const init = require("./controllers/database/init");
 
+const morgan = require("morgan");
+
 const langSyncServerApp = express();
 
 (async () => await init())();
+
+langSyncServerApp.use(morgan(":method :url :status - :response-time ms"));
 
 langSyncServerApp.use(express.json());
 
