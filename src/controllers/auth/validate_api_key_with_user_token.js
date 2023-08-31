@@ -1,8 +1,9 @@
 const configs = require("../../configs/server");
 const crypto = require("crypto");
 const Joi = require("joi");
+const findOne = require("../database/read");
 
-module.exports = function verifyApiKeyWithUserAuthToken(req, res) {
+module.exports = async function verifyApiKeyWithUserAuthToken(req, res) {
   let schema = Joi.object({
     apiKey: Joi.string().min(2).required(),
     userAuthToken: Joi.string().min(2).required(),
@@ -17,22 +18,26 @@ module.exports = function verifyApiKeyWithUserAuthToken(req, res) {
   const { apiKey, userAuthToken } = value;
 
   try {
-    const decipher = crypto.createDecipheriv(
-      "aes-256-cbc",
-      configs.cipherSecretKey,
-      configs.serverInitVector
+    let document = await findOne("db", "users", {
+      userAuthToken: userAuthToken,
+    });
+
+    if (!document) {
+      return res.status(401).json({
+        message: "Invalid User Auth Token",
+      });
+    }
+    let apiKeyFromDocument = document.apiKeys.find(
+      (item) => item.apiKey === apiKey
     );
 
-    let decryptedApiKey = decipher.update(apiKey, "hex", "utf8");
-    decryptedApiKey += decipher.final("utf8");
-
-    if (decryptedApiKey === userAuthToken) {
-      res.status(200).json({
-        message: "Valid API key",
+    if (!apiKeyFromDocument) {
+      return res.status(401).json({
+        message: "Invalid API key",
       });
     } else {
-      res.status(401).json({
-        message: "Invalid API key",
+      return res.status(200).json({
+        message: "API key is valid",
       });
     }
   } catch (error) {

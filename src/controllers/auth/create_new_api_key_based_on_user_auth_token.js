@@ -1,8 +1,9 @@
 const configs = require("../../configs/server");
 const crypto = require("crypto");
 const Joi = require("joi");
+const update = require("../database/update");
 
-module.exports = function createNewApiKeyBasedOnUserAuthToken(req, res) {
+module.exports = async function createNewApiKeyBasedOnUserAuthToken(req, res) {
   let schema = Joi.object({
     userAuthToken: Joi.string().min(2).required(),
   });
@@ -13,18 +14,36 @@ module.exports = function createNewApiKeyBasedOnUserAuthToken(req, res) {
     return res.status(400).json({ message: error });
   }
 
-  let { userAuthToken } = value;
+  try {
+    let { userAuthToken } = value;
 
-  const cipher = crypto.createCipheriv(
-    "aes-256-cbc",
-    configs.cipherSecretKey,
-    configs.serverInitVector
-  );
+    let apiKey = crypto
+      .createHmac("sha256", configs.cipherSecretKey)
+      .update(userAuthToken + "-" + new Date().getTime())
+      .digest("hex");
 
-  let encryptedAuthToken = cipher.update(userAuthToken, "utf8", "hex");
-  encryptedAuthToken += cipher.final("hex");
+    let apiKeyItem = {
+      date: new Date(),
+      apiKey: apiKey,
+    };
 
-  res.status(201).json({
-    apiKey: encryptedAuthToken,
-  });
+    let filterDoc = {
+      userAuthToken: userAuthToken,
+    };
+
+    let updateDoc = {
+      $push: {
+        apiKeys: apiKeyItem,
+      },
+    };
+
+    await update("db", "users", filterDoc, updateDoc);
+
+    res.status(201).json({
+      mesage: "New API key created & saved successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
 };
