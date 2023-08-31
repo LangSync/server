@@ -3,7 +3,7 @@ const Joi = require("joi");
 
 module.exports = async function saveUser(req, res) {
   if (!req.headers["authorization"]) {
-    return res.status(400).json({ message: error });
+    return res.status(400).json({ message: "Authorization Key is required" });
   }
 
   try {
@@ -25,6 +25,7 @@ module.exports = async function saveUser(req, res) {
       userAuthToken: 1,
       userId: 1,
       apiKeysLength: { $size: "$apiKeys" },
+      createdAt: 1,
     };
 
     let aggregateQuery = [

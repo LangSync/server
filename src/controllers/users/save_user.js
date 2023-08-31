@@ -14,7 +14,10 @@ module.exports = async function saveUser(req, res) {
       return res.status(400).json({ message: error });
     }
 
-    const addUserToDatabase = await insertToDb("db", "users", value);
+    const addUserToDatabase = await insertToDb("db", "users", {
+      ...value,
+      createdAt: new Date(),
+    });
 
     return res
       .status(200)
