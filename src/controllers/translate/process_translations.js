@@ -50,24 +50,44 @@ async function _handlePartitionsTranslations(partitions, langs) {
 }
 
 async function processTranslations(req, res) {
+  let apiKey = req.headers.authorization.split(" ")[1];
+
+  if (!apiKey) {
+    res.sendStatus(401).json({ message: "Invalid API key." });
+  }
+
+  let schema = Joi.object({
+    jsonPartitionsId: Joi.string().min(2).required(),
+    langs: Joi.array().items(Joi.string().min(2)).required(),
+  });
+
+  let { error, value } = schema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error });
+  }
+
   try {
-    let schema = Joi.object({
-      jsonPartitionsId: Joi.string().min(2).required(),
-      userAuthToken: Joi.string().min(2).required(),
-      langs: Joi.array().items(Joi.string().min(2)).required(),
-    });
+    const { jsonPartitionsId, langs } = value;
 
-    let { error, value } = schema.validate(req.body);
+    const userDocFIlter = {
+      apiKeys: {
+        $elemMatch: {
+          apiKey: apiKey,
+        },
+      },
+    };
 
-    if (error) {
-      return res.status(400).json({ message: error });
+    let userDoc = await read("db", "users", userDocFIlter);
+
+    if (!userDoc) {
+      return res.status(401).json({ message: "Invalid API key." });
     }
 
-    const { jsonPartitionsId, userAuthToken, langs } = value;
+    // ...
 
     const filterDoc = {
       partitionId: jsonPartitionsId,
-      userAuthToken: userAuthToken,
     };
 
     const partitionsDoc = await read("db", "jsonPartitions", filterDoc);
@@ -79,7 +99,7 @@ async function processTranslations(req, res) {
       langs
     );
 
-    res.status(200).json({ resultTranslations });
+    res.status(200).json({ result: resultTranslations });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

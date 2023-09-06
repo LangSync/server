@@ -10,15 +10,14 @@ module.exports = async function save_partitioned_json_of_user(req, res) {
 
     const uploadedJsonFile = fs.readFileSync(filePath, "utf8");
 
-    const { userToken, userId } = req.body;
+    let apiKey = req.headers.authorization.split(" ")[1];
 
     const parsedJson = JSON.parse(uploadedJsonFile);
     const jsonAsParts = json_tiktoken_separator(parsedJson);
     const idForThisPartitionedJson = v4();
 
     const doc = {
-      userAuthToken: userToken,
-      userId: userId,
+      apiKey: apiKey,
       jsonAsParts: jsonAsParts,
       createdAt: new Date().toISOString(),
       partitionId: idForThisPartitionedJson,
