@@ -22,7 +22,7 @@ rtr.post("/verify-api-key-with-user-auth-token", verifyApiKeyWithUserAuthToken);
 
 rtr.post(
   "/save-partitioned-json-of-user",
-  upload.single("uploadedJsonFile"),
+  upload.single("sourceFile"),
   savePartitionedJsonOfUser
 );
 

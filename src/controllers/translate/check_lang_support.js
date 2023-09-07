@@ -1,11 +1,11 @@
 const { OpenAI } = require("openai");
 const configs = require("../../configs/openai");
 
-const openai = new OpenAI({
-  apiKey: configs.openAI,
-});
-
 async function _checkLangSupport(lang) {
+  const openai = new OpenAI({
+    apiKey: configs.openAI,
+  });
+
   let res = await openai.chat.completions.create({
     model: configs.jsonOpenAIModel,
     messages: [

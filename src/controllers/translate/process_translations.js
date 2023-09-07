@@ -3,15 +3,15 @@ const configs = require("../../configs/openai");
 const read = require("../database/read");
 const Joi = require("joi");
 
-const openai = new OpenAI({
-  apiKey: configs.openAI,
-});
-
 function _generateMessageToOpenAI(partition, lang) {
   return configs.jsonUserMessage(partition, lang);
 }
 
 async function _handlePartitionsTranslations(partitions, langs) {
+  const openai = new OpenAI({
+    apiKey: configs.openAI,
+  });
+
   let resultTranslations = [];
 
   for (let indexLang = 0; indexLang < langs.length; indexLang++) {
