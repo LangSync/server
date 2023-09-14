@@ -5,7 +5,6 @@ module.exports = async function saveUser(req, res) {
   try {
     let schema = Joi.object({
       userId: Joi.string().min(2).required(),
-      userAuthToken: Joi.string().min(2).required(),
     });
 
     let { error, value } = schema.validate(req.body);

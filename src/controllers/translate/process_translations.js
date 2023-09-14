@@ -1,6 +1,7 @@
 const { OpenAI } = require("openai");
 const configs = require("../../configs/openai");
 const read = require("../database/read");
+const update = require("../database/update");
 const Joi = require("joi");
 
 function _generateMessageToOpenAI(partition, lang) {
@@ -8,6 +9,8 @@ function _generateMessageToOpenAI(partition, lang) {
 }
 
 async function _handlePartitionsTranslations(partitions, langs) {
+  console.log(`Starting to translate ${partitions.length} partitions found.`);
+
   const openai = new OpenAI({
     apiKey: configs.openAI,
   });
@@ -18,7 +21,10 @@ async function _handlePartitionsTranslations(partitions, langs) {
     let currentLang = langs[indexLang];
     let currentLangResult = [];
 
+    console.log(`Translating to ${currentLang}..`);
+
     for (let index = 0; index < partitions.length; index++) {
+      console.log(`Translating partition ${index + 1}..`);
       const currentPartition = partitions[index];
 
       let messageToOpenAI = _generateMessageToOpenAI(
@@ -31,34 +37,39 @@ async function _handlePartitionsTranslations(partitions, langs) {
         messages: [
           {
             role: "system",
-            content: jsonSystemMessage,
+            content: configs.jsonSystemMessage,
           },
           { role: "user", content: messageToOpenAI },
         ],
       });
 
-      currentLangResult.push(currentPartitionResult);
+      currentLangResult.push(currentPartitionResult.choices[0].message.content);
+      console.log(`Partition ${index + 1} translated.`);
     }
 
     resultTranslations.push({
       lang: currentLang,
       result: currentLangResult,
     });
+    console.log(`All partitions translated to ${currentLang}.`);
   }
+
+  console.log("All partitions translated.");
 
   return resultTranslations;
 }
 
-async function processTranslations(req, res) {
+module.exports = async function processTranslations(req, res) {
   let apiKey = req.headers.authorization.split(" ")[1];
 
   if (!apiKey) {
-    res.sendStatus(401).json({ message: "Invalid API key." });
+    return res.sendStatus(401).json({ message: "Invalid API key." });
   }
 
   let schema = Joi.object({
     jsonPartitionsId: Joi.string().min(2).required(),
     langs: Joi.array().items(Joi.string().min(2)).required(),
+    includeOutput: Joi.boolean().required(),
   });
 
   let { error, value } = schema.validate(req.body);
@@ -68,7 +79,7 @@ async function processTranslations(req, res) {
   }
 
   try {
-    const { jsonPartitionsId, langs } = value;
+    const { jsonPartitionsId, langs, includeOutput } = value;
 
     const userDocFIlter = {
       apiKeys: {
@@ -78,19 +89,27 @@ async function processTranslations(req, res) {
       },
     };
 
+    console.log("using API key to see if it exists for any user..");
+
     let userDoc = await read("db", "users", userDocFIlter);
 
     if (!userDoc) {
+      console.log("invalid API key, no user found.");
       return res.status(401).json({ message: "Invalid API key." });
+    } else {
+      console.log("user with API key found.");
     }
-
-    // ...
 
     const filterDoc = {
       partitionId: jsonPartitionsId,
     };
 
+    console.log("retrieving partitions doc with partition id.");
     const partitionsDoc = await read("db", "jsonPartitions", filterDoc);
+
+    if (!partitionsDoc) {
+      return res.status(404).json({ message: "Partitions not found." });
+    }
 
     let partitions = partitionsDoc.jsonAsParts;
 
@@ -99,10 +118,28 @@ async function processTranslations(req, res) {
       langs
     );
 
-    res.status(200).json({ result: resultTranslations });
+    console.log("updating partitions doc with translations..");
+    let updatedDoc = await update("db", "jsonPartitions", filterDoc, {
+      $set: {
+        output: resultTranslations,
+      },
+    });
+
+    console.log("partitions doc updated.");
+
+    let response = {
+      partitionId: jsonPartitionsId,
+    };
+
+    if (includeOutput) {
+      console.log("including output in response..");
+      response.output = resultTranslations;
+    }
+
+    console.log(response);
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
-
-module.exports = processTranslations;
+};

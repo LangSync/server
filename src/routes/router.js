@@ -14,9 +14,9 @@ var upload = multer({ dest: "uploads/" });
 
 rtr.post("/save-user-from-provider", saveUser);
 
-rtr.get("/users", getUser);
-
 rtr.post("/create-api-key", createApiKey);
+
+rtr.get("/user", getUser);
 
 rtr.post("/verify-api-key-with-user-auth-token", verifyApiKeyWithUserAuthToken);
 

@@ -1,7 +1,7 @@
 const readMany = require("../../controllers/database/readMany");
 const Joi = require("joi");
 
-module.exports = async function saveUser(req, res) {
+module.exports = async function getUser(req, res) {
   if (!req.headers["authorization"]) {
     return res.status(400).json({ message: "Authorization Key is required" });
   }
@@ -47,10 +47,6 @@ module.exports = async function saveUser(req, res) {
       });
     } else {
       console.log(userDocumment.apiKeys);
-
-      // userDocumment.apiKeysLength = apiKeysLength;
-
-      // delete userDocumment.apiKeys;
 
       return res.status(200).json({
         message: "User found",

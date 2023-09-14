@@ -17,7 +17,7 @@ function json_tiktoken_separator(parsedJson, maxTokens = 4096) {
     let key = entries[index][0];
     let value = entries[index][1];
 
-    let entry = `${key}: ${value}`;
+    let entry = `("${key}": "${value}")`;
 
     // console.log("start iteration of " + entry);
 
@@ -41,7 +41,7 @@ function json_tiktoken_separator(parsedJson, maxTokens = 4096) {
       continue;
     }
 
-    latestPart += entry + "\n";
+    latestPart += entry;
     latestPartTokens += encoded.length;
 
     if (

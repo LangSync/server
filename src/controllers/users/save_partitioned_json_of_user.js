@@ -13,7 +13,6 @@ module.exports = async function save_partitioned_json_of_user(req, res) {
     let apiKey = req.headers.authorization.split(" ")[1];
 
     const parsedJson = JSON.parse(uploadedJsonFile);
-    console.log(parsedJson);
     const jsonAsParts = json_tiktoken_separator(parsedJson);
     const idForThisPartitionedJson = v4();
 

@@ -5,7 +5,7 @@ const update = require("../database/update");
 
 module.exports = async function createNewApiKeyBasedOnUserAuthToken(req, res) {
   let schema = Joi.object({
-    userAuthToken: Joi.string().min(2).required(),
+    userId: Joi.string().min(2).required(),
   });
 
   let { error, value } = schema.validate(req.body);
@@ -15,11 +15,9 @@ module.exports = async function createNewApiKeyBasedOnUserAuthToken(req, res) {
   }
 
   try {
-    let { userAuthToken } = value;
-
     let apiKey = crypto
       .createHmac("sha256", configs.cipherSecretKey)
-      .update(userAuthToken + "-" + new Date().getTime())
+      .update(value.userId + "-" + new Date().getTime())
       .digest("hex");
 
     let apiKeyItem = {
@@ -28,7 +26,7 @@ module.exports = async function createNewApiKeyBasedOnUserAuthToken(req, res) {
     };
 
     let filterDoc = {
-      userAuthToken: userAuthToken,
+      userId: value.userId,
     };
 
     let updateDoc = {
@@ -40,10 +38,12 @@ module.exports = async function createNewApiKeyBasedOnUserAuthToken(req, res) {
     await update("db", "users", filterDoc, updateDoc);
 
     res.status(201).json({
-      mesage: "New API key created & saved successfully",
+      message: "New API key created & saved successfully",
+      apiKey: apiKey,
     });
   } catch (error) {
     console.log(error);
+
     res.status(500).json({ message: error.message });
   }
 };
