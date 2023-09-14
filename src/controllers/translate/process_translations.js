@@ -80,6 +80,7 @@ async function _handlePartitionsTranslations(partitions, langs) {
 
     resultTranslations.push({
       lang: currentLang,
+      localizedAt: new Date().toISOString(),
       rawRResultResponse: currentLangResult,
       jsonDecodedResponse: _canBeDecodedToJsonSafely(currentLangResult)
         ? _jsonFromEncapsulatedFields(currentLangResult)
@@ -139,6 +140,7 @@ module.exports = async function processTranslations(req, res) {
     };
 
     console.log("retrieving partitions doc with partition id.");
+
     const partitionsDoc = await read("db", "jsonPartitions", filterDoc);
 
     if (!partitionsDoc) {
@@ -153,9 +155,13 @@ module.exports = async function processTranslations(req, res) {
     );
 
     console.log("updating partitions doc with translations..");
-    let updatedDoc = await update("db", "jsonPartitions", filterDoc, {
-      $set: {
-        output: resultTranslations,
+
+    //
+    await update("db", "jsonPartitions", filterDoc, {
+      $addToSet: {
+        output: {
+          $each: resultTranslations,
+        },
       },
     });
 
