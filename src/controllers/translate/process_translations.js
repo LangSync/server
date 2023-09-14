@@ -4,6 +4,38 @@ const read = require("../database/read");
 const update = require("../database/update");
 const Joi = require("joi");
 
+async function _makeOpenAIRequest(messageToOpenAI) {
+  const openai = new OpenAI({
+    apiKey: configs.openAI,
+  });
+
+  try {
+    let res = await openai.chat.completions.create({
+      model: configs.jsonOpenAIModel,
+      messages: [
+        {
+          role: "system",
+          content: configs.jsonSystemMessage,
+        },
+        { role: "user", content: messageToOpenAI },
+      ],
+    });
+
+    return res;
+  } catch (error) {
+    if (error.status === 429) {
+      console.log(
+        "OpenAI API rate limit reached, waiting 20 seconds for next request"
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 20 * 1000));
+      console.log("20 seconds passed, continuing request");
+      return await _makeOpenAIRequest(messageToOpenAI);
+    } else {
+      throw error;
+    }
+  }
+}
 function _generateMessageToOpenAI(partition, lang) {
   return configs.jsonUserMessage(partition, lang);
 }
@@ -42,10 +74,6 @@ function _jsonFromEncapsulatedFields(encapsulatedFieldsString) {
 async function _handlePartitionsTranslations(partitions, langs) {
   console.log(`Starting to translate ${partitions.length} partitions found.`);
 
-  const openai = new OpenAI({
-    apiKey: configs.openAI,
-  });
-
   let resultTranslations = [];
 
   for (let indexLang = 0; indexLang < langs.length; indexLang++) {
@@ -63,16 +91,7 @@ async function _handlePartitionsTranslations(partitions, langs) {
         currentLang
       );
 
-      let currentPartitionResult = await openai.chat.completions.create({
-        model: configs.jsonOpenAIModel,
-        messages: [
-          {
-            role: "system",
-            content: configs.jsonSystemMessage,
-          },
-          { role: "user", content: messageToOpenAI },
-        ],
-      });
+      let currentPartitionResult = await _makeOpenAIRequest(messageToOpenAI);
 
       currentLangResult.push(currentPartitionResult.choices[0].message.content);
       console.log(`Partition ${index + 1} translated.`);

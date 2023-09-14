@@ -5,7 +5,7 @@ const { getEncoding } = require("js-tiktoken");
 
 const enc = getEncoding("gpt2");
 
-function json_tiktoken_separator(parsedJson, maxTokens = 4096) {
+function json_tiktoken_separator(parsedJson, maxTokens = 100) {
   let parts = [];
 
   let latestPart = "";
@@ -31,7 +31,7 @@ function json_tiktoken_separator(parsedJson, maxTokens = 4096) {
     // console.log("tokens sum: " + tokensSum);
 
     if (tokensSum >= maxTokens) {
-      parts.push(latestPart + "\n\n\n\n\n");
+      parts.push(latestPart);
 
       latestPart = "";
       latestPartTokens = 0;

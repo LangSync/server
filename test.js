@@ -1,4 +1,4 @@
-// const { OpenAI } = require("openai");
+const { OpenAI } = require("openai");
 
 // (async () => {
 //   try {
@@ -29,27 +29,56 @@
 //   }
 // })();
 
-(() => {
+// (() => {
+//   try {
+//     let string =
+//       '("greeting": "Bienvenue, ami!")("farewell": "Au revoir, à la prochaine")("thank_you": "Merci pour votre soutien")("error_message": "Une erreur est survenue. Veuillez réessayer.")("success_message": "Opération réussie!")("settings_title": "Paramètres")("profile_title": "Profil")("notification_title": "Notifications")("search_hint": "Recherchez quelque chose...")("cancel": "Annuler")("save_changes": "Enregistrer les modifications")("language": "Langue")("theme": "Thème")("dark_mode": "Mode sombre")("light_mode": "Mode clair")("enable_notifications": "Activer les notifications")("notifications_on": "Notifications activées")("notifications_off": "Notifications désactivées")("edit_profile": "Modifier le profil")("logout": "Se déconnecter")("no_results": "Aucun résultat trouvé")("loading": "Chargement...")("internet_connection": "Pas de connexion internet")("retry": "Réessayer")("forgot_password": "Mot de passe oublié ?")("reset_password": "Réinitialiser le mot de passe")("change_password": "Changer le mot de passe")("new_password": "Nouveau mot de passe")("confirm_password": "Confirmer le mot de passe")("password_mismatch": "Les mots de passe ne correspondent pas")("invalid_email": "Adresse email invalide")("email_sent": "Email envoyé avec succès")("welcome_back": "Bienvenue de retour!")("continue": "Continuer")("take_tour": "Faire une visite")("feedback": "Envoyer des commentaires")("report_bug": "Signaler un bogue")("submit": "Envoyer")("about_us": "À propos de nous")("contact_us": "Nous contacter")("privacy_policy": "Politique de confidentialité")("terms_of_service": "Conditions d\'utilisation")("rate_app": "Évaluer cette application")("share_app": "Partager cette application")("follow_us": "Suivez-nous")("check_updates": "Vérifier les mises à jour")("your_cart": "Votre panier")("total_amount": "Montant total")("checkout": "Paiement")("order_summary": "Récapitulatif de la commande")';
+
+//     let replacedSymbols = string
+//       .replaceAll("(", "")
+//       .replaceAll(")", "")
+//       .replaceAll("\n", "")
+//       .replaceAll('""', '"\n"');
+
+//     let asLines = replacedSymbols.split("\n");
+
+//     for (let index = 0; index < asLines.length - 1; index++) {
+//       asLines[index] = asLines[index] + ", ";
+//     }
+
+//     let asStringifedJson = "{" + asLines.join("\n") + "}";
+
+//     console.log(JSON.parse(asStringifedJson));
+//   } catch (error) {
+//     console.log("can't be decoded");
+//   }
+// })();
+
+async function _makeOpenAIRequest(messageToOpenAI) {
+  const openai = new OpenAI({
+    apiKey: "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",
+  });
+
   try {
-    let string =
-      '("greeting": "Bienvenue, ami!")("farewell": "Au revoir, à la prochaine")("thank_you": "Merci pour votre soutien")("error_message": "Une erreur est survenue. Veuillez réessayer.")("success_message": "Opération réussie!")("settings_title": "Paramètres")("profile_title": "Profil")("notification_title": "Notifications")("search_hint": "Recherchez quelque chose...")("cancel": "Annuler")("save_changes": "Enregistrer les modifications")("language": "Langue")("theme": "Thème")("dark_mode": "Mode sombre")("light_mode": "Mode clair")("enable_notifications": "Activer les notifications")("notifications_on": "Notifications activées")("notifications_off": "Notifications désactivées")("edit_profile": "Modifier le profil")("logout": "Se déconnecter")("no_results": "Aucun résultat trouvé")("loading": "Chargement...")("internet_connection": "Pas de connexion internet")("retry": "Réessayer")("forgot_password": "Mot de passe oublié ?")("reset_password": "Réinitialiser le mot de passe")("change_password": "Changer le mot de passe")("new_password": "Nouveau mot de passe")("confirm_password": "Confirmer le mot de passe")("password_mismatch": "Les mots de passe ne correspondent pas")("invalid_email": "Adresse email invalide")("email_sent": "Email envoyé avec succès")("welcome_back": "Bienvenue de retour!")("continue": "Continuer")("take_tour": "Faire une visite")("feedback": "Envoyer des commentaires")("report_bug": "Signaler un bogue")("submit": "Envoyer")("about_us": "À propos de nous")("contact_us": "Nous contacter")("privacy_policy": "Politique de confidentialité")("terms_of_service": "Conditions d\'utilisation")("rate_app": "Évaluer cette application")("share_app": "Partager cette application")("follow_us": "Suivez-nous")("check_updates": "Vérifier les mises à jour")("your_cart": "Votre panier")("total_amount": "Montant total")("checkout": "Paiement")("order_summary": "Récapitulatif de la commande")';
+    let res = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: messageToOpenAI }],
+    });
 
-    let replacedSymbols = string
-      .replaceAll("(", "")
-      .replaceAll(")", "")
-      .replaceAll("\n", "")
-      .replaceAll('""', '"\n"');
-
-    let asLines = replacedSymbols.split("\n");
-
-    for (let index = 0; index < asLines.length - 1; index++) {
-      asLines[index] = asLines[index] + ", ";
-    }
-
-    let asStringifedJson = "{" + asLines.join("\n") + "}";
-
-    console.log(JSON.parse(asStringifedJson));
+    return res.choices[0].message.content;
   } catch (error) {
-    console.log("can't be decoded");
+    if (error.status === 429) {
+      await new Promise((resolve) => setTimeout(resolve, 20 * 1000));
+      return await _makeOpenAIRequest(messageToOpenAI);
+    } else {
+      throw error;
+    }
+  }
+}
+
+(async () => {
+  for (let index = 0; index < 10; index++) {
+    let r = await _makeOpenAIRequest("say random number from 1 to 1000");
+    console.log(r);
   }
 })();
