@@ -8,6 +8,37 @@ function _generateMessageToOpenAI(partition, lang) {
   return configs.jsonUserMessage(partition, lang);
 }
 
+function _canBeDecodedToJsonSafely(encapsulatedFieldsString) {
+  try {
+    let decoded = _jsonFromEncapsulatedFields(encapsulatedFieldsString);
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
+
+function _jsonFromEncapsulatedFields(encapsulatedFieldsString) {
+  let replacedSymbols = encapsulatedFieldsString
+    .join("")
+    .replaceAll("(", "")
+    .replaceAll(")", "")
+    .replaceAll(`\"`, `"`)
+    .replaceAll("\n", "")
+    .replaceAll('""', '"\n"');
+
+  let asLines = replacedSymbols.split("\n");
+
+  for (let index = 0; index < asLines.length - 1; index++) {
+    asLines[index] = asLines[index] + ", ";
+  }
+
+  let asStringifedJson = "{" + asLines.join("\n") + "}";
+
+  return JSON.parse(asStringifedJson);
+}
+
 async function _handlePartitionsTranslations(partitions, langs) {
   console.log(`Starting to translate ${partitions.length} partitions found.`);
 
@@ -49,7 +80,10 @@ async function _handlePartitionsTranslations(partitions, langs) {
 
     resultTranslations.push({
       lang: currentLang,
-      result: currentLangResult,
+      rawRResultResponse: currentLangResult,
+      jsonDecodedResponse: _canBeDecodedToJsonSafely(currentLangResult)
+        ? _jsonFromEncapsulatedFields(currentLangResult)
+        : { error: "the output of this partition can't be decoded to JSON" },
     });
     console.log(`All partitions translated to ${currentLang}.`);
   }
