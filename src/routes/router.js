@@ -7,6 +7,7 @@ const checkLangSupport = require("../controllers/translate/check_lang_support");
 const getUser = require("../controllers/users/get_user");
 
 const savePartitionedJsonOfUser = require("../controllers/users/save_partitioned_json_of_user");
+const getSavedPartitionedJsonOfUser = require("../controllers/users/get_saved_partitioned_json_of_user");
 const processTranslations = require("../controllers/translate/process_translations");
 
 const multer = require("multer");
@@ -25,6 +26,8 @@ rtr.post(
   upload.single("sourceFile"),
   savePartitionedJsonOfUser
 );
+
+rtr.get("/get-partitioned-json-of-user", getSavedPartitionedJsonOfUser);
 
 rtr.post("/process-translation", processTranslations);
 
