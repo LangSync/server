@@ -28,7 +28,13 @@ async function _makeOpenAIRequest(messageToOpenAI) {
         "OpenAI API rate limit reached, waiting 20 seconds for next request"
       );
 
-      await new Promise((resolve) => setTimeout(resolve, 20 * 1000));
+      await new Promise((resolve) =>
+        setTimeout(
+          resolve,
+          configs.delayForRateLimitNextRequestInSeconds * 1000
+        )
+      );
+
       console.log("20 seconds passed, continuing request");
       return await _makeOpenAIRequest(messageToOpenAI);
     } else {
