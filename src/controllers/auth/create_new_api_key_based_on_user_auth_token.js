@@ -21,7 +21,9 @@ module.exports = async function createNewApiKeyBasedOnUserAuthToken(req, res) {
       .digest("hex");
 
     let apiKeyItem = {
-      date: new Date(),
+      $currentDate: {
+        date: { $type: "date" },
+      },
       apiKey: apiKey,
     };
 
