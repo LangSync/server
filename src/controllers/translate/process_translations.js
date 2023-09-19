@@ -120,6 +120,8 @@ async function _handlePartitionsTranslations(partitions, langs) {
 }
 
 module.exports = async function processTranslations(req, res) {
+  console.log(req.body);
+
   let apiKey = req.headers.authorization.split(" ")[1];
 
   if (!apiKey) {

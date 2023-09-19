@@ -10,11 +10,9 @@ async function init() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
-    
   } catch (err) {
     console.dir(err);
   }
 }
-
 
 module.exports = init;

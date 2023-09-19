@@ -1,5 +1,6 @@
 const json_tiktoken_separator = require("../utils/json_tiktoken_separator");
 const insert = require("../database/insert");
+const read = require("../database/read");
 const { v4 } = require("uuid");
 const fs = require("fs");
 const configs = require("../../configs/openai");
@@ -70,8 +71,19 @@ module.exports = async function save_partitioned_json_of_user(req, res) {
     const jsonAsParts = json_tiktoken_separator(parsedJson);
     const idForThisPartitionedJson = v4();
 
+    let userDocFilter = {
+      apiKeys: {
+        $elemMatch: {
+          apiKey: apiKey,
+        },
+      },
+    };
+
+    let userDoc = await read("db", "users", userDocFilter);
+    let userId = userDoc.userId;
+
     const doc = {
-      apiKey: apiKey,
+      userId: userId,
       jsonAsParts: jsonAsParts,
       createdAt: new Date().toISOString(),
       partitionId: idForThisPartitionedJson,

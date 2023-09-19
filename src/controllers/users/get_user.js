@@ -3,19 +3,25 @@ const Joi = require("joi");
 
 module.exports = async function getUser(req, res) {
   if (!req.headers["authorization"]) {
-    return res.status(400).json({ message: "Authorization Key is required" });
+    return res.status(400).json({
+      message:
+        "You need to provide a valid Bearer API key in the authorization header.",
+    });
   }
 
   try {
-    let AuthorizationKey = req.headers.authorization.split(" ")[1];
-    if (!AuthorizationKey) {
-      res.sendStatus(401).json({ message: "Invalid Authorization Key" });
+    let apiKey = req.headers.authorization.split(" ")[1];
+
+    if (!apiKey) {
+      res
+        .sendStatus(400)
+        .json({ message: "Invalid API key, no user match that key" });
     }
 
     let documentFilterToRead = {
       apiKeys: {
         $elemMatch: {
-          apiKey: AuthorizationKey,
+          apiKey: apiKey,
         },
       },
     };
@@ -43,10 +49,48 @@ module.exports = async function getUser(req, res) {
 
     if (!userDocumment) {
       return res.status(401).json({
-        message: "Invalid Authorization Key",
+        message: "Invalid API key, no user match that key",
       });
     } else {
-      console.log(userDocumment.apiKeys);
+      let userId = userDocumment.userId;
+
+      let localizationDocsFilter = {
+        userId: userId,
+      };
+
+      let localizationDocsProject = {
+        userId: 1,
+        jsonPartsLength: {
+          $size: "$jsonAsParts",
+        },
+        // map over "listfield".
+
+        outputLangs: {
+          $reduce: {
+            input: "$output",
+            initialValue: [],
+            in: { $concatArrays: ["$$value", ["$$this.lang"]] },
+          },
+        },
+        partitionId: 1,
+      };
+
+      let localizedDocsAggregateQuery = [
+        {
+          $match: localizationDocsFilter,
+        },
+        {
+          $project: localizationDocsProject,
+        },
+      ];
+
+      let localizationDocs = await readMany(
+        "db",
+        "jsonPartitions",
+        localizedDocsAggregateQuery
+      );
+
+      userDocumment.localizationDocs = localizationDocs;
 
       return res.status(200).json({
         message: "User found",
