@@ -1,4 +1,4 @@
-const { OpenAI } = require("openai");
+// const { OpenAI } = require("openai");
 
 // (async () => {
 //   try {
@@ -54,31 +54,33 @@ const { OpenAI } = require("openai");
 //   }
 // })();
 
-async function _makeOpenAIRequest(messageToOpenAI) {
-  const openai = new OpenAI({
-    apiKey: "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",
-  });
+// async function _makeOpenAIRequest(messageToOpenAI) {
+//   const openai = new OpenAI({
+//     apiKey: "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",
+//   });
 
-  try {
-    let res = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: messageToOpenAI }],
-    });
+//   try {
+//     let res = await openai.chat.completions.create({
+//       model: "gpt-3.5-turbo",
+//       messages: [{ role: "user", content: messageToOpenAI }],
+//     });
 
-    return res.choices[0].message.content;
-  } catch (error) {
-    if (error.status === 429) {
-      await new Promise((resolve) => setTimeout(resolve, 20 * 1000));
-      return await _makeOpenAIRequest(messageToOpenAI);
-    } else {
-      throw error;
-    }
-  }
-}
+//     return res.choices[0].message.content;
+//   } catch (error) {
+//     if (error.status === 429) {
+//       await new Promise((resolve) => setTimeout(resolve, 20 * 1000));
+//       return await _makeOpenAIRequest(messageToOpenAI);
+//     } else {
+//       throw error;
+//     }
+//   }
+// }
 
-(async () => {
-  for (let index = 0; index < 10; index++) {
-    let r = await _makeOpenAIRequest("say random number from 1 to 1000");
-    console.log(r);
-  }
-})();
+// (async () => {
+//   for (let index = 0; index < 10; index++) {
+//     let r = await _makeOpenAIRequest("say random number from 1 to 1000");
+//     console.log(r);
+//   }
+// })();
+
+console.log(String.raw`hello,\n{}`);

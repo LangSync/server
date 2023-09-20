@@ -2,10 +2,13 @@ let fs = require("fs");
 let path = require("path");
 const e = require("express");
 const { getEncoding } = require("js-tiktoken");
+const configs = require("../../configs/openai");
 
 const enc = getEncoding("gpt2");
 
-function json_tiktoken_separator(parsedJson, maxTokens = 100) {
+function json_tiktoken_separator(parsedJson) {
+  let maxTokens = configs.maxTokens();
+
   let parts = [];
 
   let latestPart = "";
@@ -17,7 +20,7 @@ function json_tiktoken_separator(parsedJson, maxTokens = 100) {
     let key = entries[index][0];
     let value = entries[index][1];
 
-    let entry = `("${key}": "${value}")`;
+    let entry = String.raw`("${key}": "${value}")`;
 
     // console.log("start iteration of " + entry);
 
