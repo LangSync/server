@@ -31,6 +31,6 @@ rtr.get("/get-partitioned-json-of-user", getSavedPartitionedJsonOfUser);
 
 rtr.post("/process-translation", processTranslations);
 
-rtr.get("/langs/:lang", checkLangSupport);
+rtr.post("/langs-support", checkLangSupport);
 
 module.exports = rtr;

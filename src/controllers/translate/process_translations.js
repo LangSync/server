@@ -74,6 +74,8 @@ function _jsonFromEncapsulatedFields(encapsulatedFieldsString) {
 
   let asStringifedJson = "{" + asLines.join("\n") + "}";
 
+  // console.log("\n\n asStringifedJson:       " + asStringifedJson + "\n\n");
+
   return JSON.parse(asStringifedJson);
 }
 

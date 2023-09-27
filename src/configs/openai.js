@@ -6,14 +6,11 @@ module.exports = {
     let message = `Translate this to ${lang}: ${partition}`;
     return message;
   },
-  langSupportMessage: (lang) => {
-    let message = `return 'true' if you can translate to ${lang}, else return 'false'. don't return anything else than true or false.`;
-    return message;
-  },
+  langsSupportInstruction: `from the given list, filter only strings that relates to some ISO 639-1 code and return them comma separated without changing their original format.`,
   jsonOpenAIModel: "gpt-3.5-turbo",
   modelMaximumTokens: 4096,
   maxTokens: () => {
-    let r = module.exports.modelMaximumTokens * 0.3;
+    let r = module.exports.modelMaximumTokens * 0.2;
     return r.toFixed(0);
   },
   jsonSystemMessage:
