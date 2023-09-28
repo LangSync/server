@@ -6,7 +6,7 @@ module.exports = {
     let message = `Translate this to ${lang}: ${partition}`;
     return message;
   },
-  langsSupportInstruction: `from the given list, filter only strings that relates to some ISO 639-1 code and return them comma separated without changing their original format.`,
+  langsSupportInstruction: `from the given list, filter only strings that relates to some ISO 639-1 language code and return them comma separated without changing their original format.`,
   jsonOpenAIModel: "gpt-3.5-turbo",
   modelMaximumTokens: 4096,
   maxTokens: () => {

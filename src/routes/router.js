@@ -11,6 +11,7 @@ const createUser = require("../controllers/users/create_user");
 const savePartitionedJsonOfUser = require("../controllers/users/save_partitioned_json_of_user");
 const getSavedPartitionedJsonOfUser = require("../controllers/users/get_saved_partitioned_json_of_user");
 const processTranslations = require("../controllers/translate/process_translations");
+const processCliException = require("../controllers/cli/process_exceptions");
 
 const multer = require("multer");
 var upload = multer({ dest: "uploads/" });
@@ -38,5 +39,7 @@ rtr.get("/get-partitioned-json-of-user", getSavedPartitionedJsonOfUser);
 rtr.post("/process-translation", processTranslations);
 
 rtr.post("/langs-support", checkLangSupport);
+
+rtr.post("/log-exception", processCliException);
 
 module.exports = rtr;
