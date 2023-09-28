@@ -67,6 +67,8 @@ module.exports = async function save_partitioned_json_of_user(req, res) {
       console.log("The provided content is acceptable to be processed.");
     }
 
+    console.log(uploadedJsonFile);
+
     const parsedJson = JSON.parse(uploadedJsonFile);
     const jsonAsParts = json_tiktoken_separator(parsedJson);
     const idForThisPartitionedJson = v4();

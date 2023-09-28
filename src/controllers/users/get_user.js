@@ -59,11 +59,11 @@ module.exports = async function getUser(req, res) {
       };
 
       let localizationDocsProject = {
-        userId: 1,
         jsonPartsLength: {
           $size: "$jsonAsParts",
         },
-        // map over "listfield".
+
+        createdAt: 1,
 
         outputLangs: {
           $reduce: {
