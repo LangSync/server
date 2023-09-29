@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./src/index",
+    "start": "node ./src/index",
+    "dev": "nodemon ./src/index",
     "separator": "node ./src/controllers/utils/json_tiktoken_separator.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
