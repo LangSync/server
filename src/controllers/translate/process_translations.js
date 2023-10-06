@@ -1,83 +1,12 @@
-const { OpenAI } = require("openai");
-const configs = require("../../configs/openai");
 const read = require("../database/read");
 const update = require("../database/update");
 const Joi = require("joi");
-
-async function _makeOpenAIRequest(messageToOpenAI) {
-  const openai = new OpenAI({
-    apiKey: configs.openAI,
-  });
-
-  try {
-    let res = await openai.chat.completions.create({
-      model: configs.jsonOpenAIModel,
-      messages: [
-        {
-          role: "system",
-          content: configs.jsonSystemMessage,
-        },
-        { role: "user", content: messageToOpenAI },
-      ],
-    });
-
-    return res;
-  } catch (error) {
-    if (error.status === 429) {
-      console.log(
-        "OpenAI API rate limit reached, waiting 20 seconds for next request"
-      );
-
-      await new Promise((resolve) =>
-        setTimeout(
-          resolve,
-          configs.delayForRateLimitNextRequestInSeconds * 1000
-        )
-      );
-
-      console.log("20 seconds passed, continuing request");
-      return await _makeOpenAIRequest(messageToOpenAI);
-    } else {
-      throw error;
-    }
-  }
-}
-function _generateMessageToOpenAI(partition, lang) {
-  return configs.jsonUserMessage(partition, lang);
-}
-
-function _canBeDecodedToJsonSafely(encapsulatedFieldsString) {
-  try {
-    let decoded = _jsonFromEncapsulatedFields(encapsulatedFieldsString);
-
-    return true;
-  } catch (error) {
-    console.log(error);
-    return false;
-  }
-}
-
-function _jsonFromEncapsulatedFields(encapsulatedFieldsString) {
-  let replacedSymbols = encapsulatedFieldsString
-    .join("")
-    .replaceAll("(", "")
-    .replaceAll(")", "")
-    .replaceAll(`\"`, `"`)
-    .replaceAll("\n", "")
-    .replaceAll('""', '"\n"');
-
-  let asLines = replacedSymbols.split("\n");
-
-  for (let index = 0; index < asLines.length - 1; index++) {
-    asLines[index] = asLines[index] + ", ";
-  }
-
-  let asStringifedJson = "{" + asLines.join("\n") + "}";
-
-  // console.log("\n\n asStringifedJson:       " + asStringifedJson + "\n\n");
-
-  return JSON.parse(asStringifedJson);
-}
+const {
+  generateMessageToOpenAI,
+  makeOpenAIRequest,
+  jsonFromEncapsulatedFields,
+  canBeDecodedToJsonSafely,
+} = require("../../controllers/openai/utils");
 
 async function _handlePartitionsTranslations(partitions, langs) {
   console.log(`Starting to translate ${partitions.length} partitions found.`);
@@ -90,29 +19,44 @@ async function _handlePartitionsTranslations(partitions, langs) {
 
     console.log(`Translating to ${currentLang}..`);
 
+    let openAIMessages = [];
+
     for (let index = 0; index < partitions.length; index++) {
       console.log(`Translating partition ${index + 1}..`);
       const currentPartition = partitions[index];
 
-      let messageToOpenAI = _generateMessageToOpenAI(
+      let messageToOpenAI = generateMessageToOpenAI(
         currentPartition,
         currentLang
       );
 
-      let currentPartitionResult = await _makeOpenAIRequest(messageToOpenAI);
-
-      currentLangResult.push(currentPartitionResult.choices[0].message.content);
-      console.log(`Partition ${index + 1} translated.`);
+      openAIMessages.push(messageToOpenAI);
     }
+
+    // let currentPartitionResult = await ;
+
+    // currentLangResult.push(currentPartitionResult.choices[0].message.content);
+    // console.log(`Partition ${index + 1} translated.`);
+
+    let promises = openAIMessages.map(
+      (messageToOpenAI) => () => makeOpenAIRequest(messageToOpenAI)
+    );
+
+    let results = await Promise.all(promises.map((p) => p()));
+
+    currentLangResult = results.map(
+      (result) => result.choices[0].message.content
+    );
 
     resultTranslations.push({
       lang: currentLang,
       localizedAt: new Date().toISOString(),
       rawRResultResponse: currentLangResult,
-      jsonDecodedResponse: _canBeDecodedToJsonSafely(currentLangResult)
-        ? _jsonFromEncapsulatedFields(currentLangResult)
+      jsonDecodedResponse: canBeDecodedToJsonSafely(currentLangResult)
+        ? jsonFromEncapsulatedFields(currentLangResult)
         : { error: "the output of this partition can't be decoded to JSON" },
     });
+
     console.log(`All partitions translated to ${currentLang}.`);
   }
 
