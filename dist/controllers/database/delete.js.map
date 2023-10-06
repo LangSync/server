@@ -1,0 +1,1 @@
+{"version":3,"file":"delete.js","sourceRoot":"","sources":["../../../src/controllers/database/delete.ts"],"names":[],"mappings":";;;;;;AAAA,sDAA8B;AAE9B,SAAgB,SAAS,CAAC,YAAY,EAAE,cAAc,EAAE,QAAQ;IAC9D,OAAO,gBAAM,CAAC,EAAE,CAAC,YAAY,CAAC,CAAC,UAAU,CAAC,cAAc,CAAC,CAAC,SAAS,CAAC,QAAQ,CAAC,CAAC;AAChF,CAAC;AAFD,8BAEC"}

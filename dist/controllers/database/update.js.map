@@ -1,0 +1,1 @@
+{"version":3,"file":"update.js","sourceRoot":"","sources":["../../../src/controllers/database/update.ts"],"names":[],"mappings":";;;;;AAAA,sDAA8B;AAE9B,SAAwB,MAAM,CAAC,YAAY,EAAE,cAAc,EAAE,MAAM,EAAE,MAAM;IACzE,OAAO,gBAAM;SACV,EAAE,CAAC,YAAY,CAAC;SAChB,UAAU,CAAC,cAAc,CAAC;SAC1B,SAAS,CAAC,MAAM,EAAE,MAAM,CAAC,CAAC;AAC/B,CAAC;AALD,yBAKC;AAAA,CAAC"}

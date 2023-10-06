@@ -1,0 +1,1 @@
+{"version":3,"file":"insert.js","sourceRoot":"","sources":["../../../src/controllers/database/insert.ts"],"names":[],"mappings":";;;;;AAAA,sDAA8B;AAE9B,SAAwB,MAAM,CAAC,YAAY,EAAE,cAAc,EAAE,QAAQ;IACnE,OAAO,gBAAM,CAAC,EAAE,CAAC,YAAY,CAAC,CAAC,UAAU,CAAC,cAAc,CAAC,CAAC,SAAS,CAAC,QAAQ,CAAC,CAAC;AAChF,CAAC;AAFD,yBAEC;AAAA,CAAC"}

@@ -1,3 +1,4 @@
 {
-  "workbench.colorTheme": "clean black"
+  "workbench.colorTheme": "clean black",
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
