@@ -8,61 +8,80 @@ const {
   canBeDecodedToJsonSafely,
 } = require("../../controllers/openai/utils");
 
+async function resolveAllLangsLangsPromises(langsPromises) {
+  let result = [];
+
+  for (let index = 0; index < langsPromises.length; index++) {
+    let curr = langsPromises[index];
+    let allPartitionsPromiseResult = await curr.allPartitionsPromise();
+
+    let asContents = allPartitionsPromiseResult.map(
+      (p) => p.choices[0].message.content
+    );
+
+    let newLangObject = {
+      ...curr,
+      rawRResultResponse: asContents,
+      jsonDecodedResponse: canBeDecodedToJsonSafely(asContents)
+        ? jsonFromEncapsulatedFields(asContents)
+        : { error: "the output of this partition can't be decoded to JSON" },
+    };
+
+    delete newLangObject.allPartitionsPromise;
+
+    result.push(newLangObject);
+  }
+
+  return result;
+}
+
+function openAIRequestsFrom(openAIMessages) {
+  return openAIMessages.map(
+    (messageToOpenAI) => () => makeOpenAIRequest(messageToOpenAI)
+  );
+}
+
+function requestMessagesForOpenAI(partitions, lang) {
+  let result = [];
+
+  for (let index = 0; index < partitions.length; index++) {
+    console.log(`Translating partition ${index + 1}..`);
+    const currentPartition = partitions[index];
+
+    let messageToOpenAI = generateMessageToOpenAI(currentPartition, lang);
+
+    result.push(messageToOpenAI);
+  }
+
+  return result;
+}
+
 async function _handlePartitionsTranslations(partitions, langs) {
   console.log(`Starting to translate ${partitions.length} partitions found.`);
 
-  let resultTranslations = [];
+  let resultTranslationsBeforePromiseResolve = [];
 
   for (let indexLang = 0; indexLang < langs.length; indexLang++) {
     let currentLang = langs[indexLang];
-    let currentLangResult = [];
 
     console.log(`Translating to ${currentLang}..`);
 
-    let openAIMessages = [];
+    let openAIMessages = requestMessagesForOpenAI(partitions, currentLang);
+    let promises = openAIRequestsFrom(openAIMessages);
+    let langAllPartitionsPromise = () => Promise.all(promises.map((p) => p()));
 
-    for (let index = 0; index < partitions.length; index++) {
-      console.log(`Translating partition ${index + 1}..`);
-      const currentPartition = partitions[index];
-
-      let messageToOpenAI = generateMessageToOpenAI(
-        currentPartition,
-        currentLang
-      );
-
-      openAIMessages.push(messageToOpenAI);
-    }
-
-    // let currentPartitionResult = await ;
-
-    // currentLangResult.push(currentPartitionResult.choices[0].message.content);
-    // console.log(`Partition ${index + 1} translated.`);
-
-    let promises = openAIMessages.map(
-      (messageToOpenAI) => () => makeOpenAIRequest(messageToOpenAI)
-    );
-
-    let results = await Promise.all(promises.map((p) => p()));
-
-    currentLangResult = results.map(
-      (result) => result.choices[0].message.content
-    );
-
-    resultTranslations.push({
+    resultTranslationsBeforePromiseResolve.push({
       lang: currentLang,
       localizedAt: new Date().toISOString(),
-      rawRResultResponse: currentLangResult,
-      jsonDecodedResponse: canBeDecodedToJsonSafely(currentLangResult)
-        ? jsonFromEncapsulatedFields(currentLangResult)
-        : { error: "the output of this partition can't be decoded to JSON" },
+      allPartitionsPromise: langAllPartitionsPromise,
     });
-
-    console.log(`All partitions translated to ${currentLang}.`);
   }
 
-  console.log("All partitions translated.");
+  let resultTranslationsAfterPrmiseResolve = await resolveAllLangsLangsPromises(
+    resultTranslationsBeforePromiseResolve
+  );
 
-  return resultTranslations;
+  return resultTranslationsAfterPrmiseResolve;
 }
 
 module.exports = async function processTranslations(req, res) {
