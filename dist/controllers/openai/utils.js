@@ -37,7 +37,6 @@ function jsonFromEncapsulatedFields(encapsulatedFieldsString) {
         asLines[index] = asLines[index] + ", ";
     }
     let asStringifedJson = "{" + asLines.join("\n") + "}";
-    // console.log("\n\n asStringifedJson:       " + asStringifedJson + "\n\n");
     return JSON.parse(asStringifedJson);
 }
 function generateMessageToOpenAI(partition, lang) {
@@ -65,7 +64,7 @@ function makeOpenAIRequest(messageToOpenAI) {
             if (error.status === 429) {
                 console.log("OpenAI API rate limit reached, waiting 20 seconds for next request");
                 yield new Promise((resolve) => setTimeout(resolve, openai_2.default.delayForRateLimitNextRequestInSeconds * 1000));
-                console.log("20 seconds passed, continuing request");
+                console.log("20 seconds passed, repeating request..");
                 return yield makeOpenAIRequest(messageToOpenAI);
             }
             else {

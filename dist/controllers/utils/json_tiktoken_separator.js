@@ -7,7 +7,7 @@ const js_tiktoken_1 = require("js-tiktoken");
 const openai_1 = __importDefault(require("../../configs/openai"));
 const enc = (0, js_tiktoken_1.getEncoding)("gpt2");
 function json_tiktoken_separator(parsedJson) {
-    let maxTokens = openai_1.default.maxTokens();
+    let maxTokens = openai_1.default.maxTokens;
     let parts = [];
     let latestPart = "";
     let latestPartTokens = 0;

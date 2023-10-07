@@ -1,11 +1,10 @@
-
-import  { getEncoding } from "js-tiktoken";
-import  configs from "../../configs/openai";
+import { getEncoding } from "js-tiktoken";
+import configs from "../../configs/openai";
 
 const enc = getEncoding("gpt2");
 
 function json_tiktoken_separator(parsedJson) {
-  let maxTokens = configs.maxTokens();
+  let maxTokens = configs.maxTokens;
 
   let parts = [];
 
@@ -57,4 +56,4 @@ function json_tiktoken_separator(parsedJson) {
   return parts;
 }
 
-export default  json_tiktoken_separator;
+export default json_tiktoken_separator;

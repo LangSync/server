@@ -17,7 +17,7 @@ const update_1 = __importDefault(require("../database/update"));
 const joi_1 = __importDefault(require("joi"));
 const utils_1 = __importDefault(require("../../controllers/openai/utils"));
 function sseEvent(message, type, statusCode) {
-    let types = ["warn", "info", "error"];
+    let types = ["warn", "info", "error", "result"];
     if (!types.includes(type)) {
         type = "info";
     }
@@ -29,19 +29,24 @@ function sseEvent(message, type, statusCode) {
     };
     return JSON.stringify(obj);
 }
-function resolveAllLangsLangsPromises(langsPromises) {
+function resolveAllLangsLangsPromises(langsPromises, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let result = [];
         for (let index = 0; index < langsPromises.length; index++) {
             let curr = langsPromises[index];
+            res.write(sseEvent(`\n${curr.lang} (${index + 1}/${langsPromises.length}):`, "info", 200));
+            res.write(sseEvent(`Starting localazing..`, "info", 200));
             let allPartitionsPromiseResult = yield curr.allPartitionsPromise();
+            res.write(sseEvent(`Partition localized successfully, starting to decode the output of the ${curr.lang} language..`, "info", 200));
             let asContents = allPartitionsPromiseResult.map((p) => p.choices[0].message.content);
             let newLangObject = Object.assign(Object.assign({}, curr), { rawRResultResponse: asContents, jsonDecodedResponse: utils_1.default.canBeDecodedToJsonSafely(asContents)
                     ? utils_1.default.jsonFromEncapsulatedFields(asContents)
                     : { error: "the output of this partition can't be decoded to JSON" } });
             delete newLangObject.allPartitionsPromise;
+            res.write(sseEvent(`Decoded the output of the ${curr.lang} language successfully, continuing..`, "info", 200));
             result.push(newLangObject);
         }
+        res.write(sseEvent(`\nFinished localizing your input file to all target languages, continuing..\n`, "info", 200));
         return result;
     });
 }
@@ -51,20 +56,19 @@ function openAIRequestsFrom(openAIMessages) {
 function requestMessagesForOpenAI(partitions, lang) {
     let result = [];
     for (let index = 0; index < partitions.length; index++) {
-        console.log(`Translating partition ${index + 1}..`);
         const currentPartition = partitions[index];
         let messageToOpenAI = utils_1.default.generateMessageToOpenAI(currentPartition, lang);
         result.push(messageToOpenAI);
     }
     return result;
 }
-function _handlePartitionsTranslations(partitions, langs) {
+function _handlePartitionsTranslations(partitions, langs, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(`Starting to translate ${partitions.length} partitions found.`);
+        res.write(sseEvent(`Starting to localize ${partitions.length} partitions found from your input file to target languages: ${langs.join(", ")}\n`, "info", 200));
         let resultTranslationsBeforePromiseResolve = [];
         for (let indexLang = 0; indexLang < langs.length; indexLang++) {
             let currentLang = langs[indexLang];
-            console.log(`Translating to ${currentLang}..`);
+            res.write(sseEvent(`Scheduling the ${currentLang} language localization task. (lang ${indexLang + 1}/${langs.length})`, "info", 200));
             let openAIMessages = requestMessagesForOpenAI(partitions, currentLang);
             let promises = openAIRequestsFrom(openAIMessages);
             let langAllPartitionsPromise = () => Promise.all(promises.map((p) => p()));
@@ -74,7 +78,7 @@ function _handlePartitionsTranslations(partitions, langs) {
                 allPartitionsPromise: langAllPartitionsPromise,
             });
         }
-        let resultTranslationsAfterPrmiseResolve = yield resolveAllLangsLangsPromises(resultTranslationsBeforePromiseResolve);
+        let resultTranslationsAfterPrmiseResolve = yield resolveAllLangsLangsPromises(resultTranslationsBeforePromiseResolve, res);
         return resultTranslationsAfterPrmiseResolve;
     });
 }
@@ -82,9 +86,7 @@ function processTranslations(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let apiKey = req.headers.authorization.split(" ")[1];
         if (!apiKey) {
-            // send sse event.
-            res.write(sseEvent("No API key provided.", "error", 401));
-            return res.end();
+            return res.end(sseEvent("No API key provided.", "error", 401));
         }
         let schema = joi_1.default.object({
             jsonPartitionsId: joi_1.default.string().min(2).required(),
@@ -93,7 +95,10 @@ function processTranslations(req, res) {
         });
         let { error, value } = schema.validate(req.body);
         if (error) {
-            return res.status(400).json({ message: error });
+            return res.end(sseEvent(error, "error", 400));
+        }
+        else {
+            res.write(sseEvent("Your Request data syntax is validated successfully, continuing..\n", "info", 200));
         }
         try {
             const { jsonPartitionsId, langs, includeOutput } = value;
@@ -104,27 +109,28 @@ function processTranslations(req, res) {
                     },
                 },
             };
-            console.log("using API key to see if it exists for any user..");
+            res.write(sseEvent("Validating the saved API key..", "info", 200));
             let userDoc = yield (0, read_1.default)("db", "users", userDocFIlter);
             if (!userDoc) {
-                console.log("invalid API key, no user found.");
-                return res.status(401).json({ message: "Invalid API key." });
+                return res.end(sseEvent("Invalid API key, no match found.", "error", 401));
             }
             else {
-                console.log("user with API key found.");
+                res.write(sseEvent(`${userDoc.username}, your API key is valid, continuing..\n`, "info", 200));
             }
             const filterDoc = {
                 partitionId: jsonPartitionsId,
             };
-            console.log("retrieving partitions doc with partition id.");
+            res.write(sseEvent("Re-checking & validating your input file partitions..", "info", 200));
             const partitionsDoc = yield (0, read_1.default)("db", "jsonPartitions", filterDoc);
             if (!partitionsDoc) {
-                return res.status(404).json({ message: "Partitions not found." });
+                return res.end(sseEvent("No partitions found for the provided ID, closing request..", "error", 404));
+            }
+            else {
+                res.write(sseEvent("Partitions found & validated successfully, continuing..\n", "info", 200));
             }
             let partitions = partitionsDoc.jsonAsParts;
-            let resultTranslations = yield _handlePartitionsTranslations(partitions, langs);
-            console.log("updating partitions doc with translations..");
-            //
+            let resultTranslations = yield _handlePartitionsTranslations(partitions, langs, res);
+            res.write(sseEvent("Localization process is done, saving the outputs to our database..", "info", 200));
             yield (0, update_1.default)("db", "jsonPartitions", filterDoc, {
                 $addToSet: {
                     output: {
@@ -132,7 +138,7 @@ function processTranslations(req, res) {
                     },
                 },
             });
-            console.log("partitions doc updated.");
+            res.write(sseEvent("Saved the outputs to our database, sending the response..", "info", 200));
             let response = {
                 partitionId: jsonPartitionsId,
             };
@@ -140,14 +146,15 @@ function processTranslations(req, res) {
                 console.log("including output in response..");
                 response.output = resultTranslations;
             }
-            console.log(response);
-            res.status(200).json(response);
+            console.log("111111111111111111111111111111111111111111");
+            yield new Promise((resolve) => setTimeout(resolve, 2000));
+            res.end(sseEvent(JSON.stringify(response), "result", 200));
         }
         catch (error) {
-            res.status(500).json({ error: error.message });
+            console.error(error);
+            res.end(sseEvent(error, "error", 500));
         }
     });
 }
 exports.default = processTranslations;
-;
 //# sourceMappingURL=process_translations.js.map
