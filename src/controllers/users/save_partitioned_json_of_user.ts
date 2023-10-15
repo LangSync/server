@@ -1,9 +1,9 @@
-import  json_tiktoken_separator from "../utils/json_tiktoken_separator";
-import  insert from "../database/insert";
-import  read from "../database/read";
-import  { v4 } from "uuid";
-import  fs from "fs";
-import  configs from "../../configs/openai";
+import json_tiktoken_separator from "../utils/json_tiktoken_separator";
+import insert from "../database/insert";
+import read from "../database/read";
+import { v4 } from "uuid";
+import fs from "fs";
+import configs from "../../configs/openai";
 import { OpenAI } from "openai";
 
 async function _isHarmingOpenAIPolicy(messageToOpenAI) {
@@ -43,7 +43,7 @@ async function _isHarmingOpenAIPolicy(messageToOpenAI) {
   }
 }
 
-export default  async function save_partitioned_json_of_user(req, res) {
+export default async function save_partitioned_json_of_user(req, res) {
   try {
     const filePath = req.file.path;
 
@@ -101,4 +101,4 @@ export default  async function save_partitioned_json_of_user(req, res) {
     console.log(error);
     res.status(500).json({ message: "Internal server error", error: error });
   }
-};
+}

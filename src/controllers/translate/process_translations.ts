@@ -49,12 +49,17 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
       (p) => p.choices[0].message.content
     );
 
+    console.log(asContents);
+
     let newLangObject = {
       ...curr,
       rawRResultResponse: asContents,
       jsonDecodedResponse: openAIUtils.canBeDecodedToJsonSafely(asContents)
         ? openAIUtils.jsonFromEncapsulatedFields(asContents)
-        : { error: "the output of this partition can't be decoded to JSON" },
+        : {
+            langsyncError:
+              "the output of this partition can't be decoded to JSON",
+          },
     };
 
     delete newLangObject.allPartitionsPromise;

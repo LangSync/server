@@ -39,9 +39,12 @@ function resolveAllLangsLangsPromises(langsPromises, res) {
             let allPartitionsPromiseResult = yield curr.allPartitionsPromise();
             res.write(sseEvent(`Partition localized successfully, starting to decode the output of the ${curr.lang} language..`, "info", 200));
             let asContents = allPartitionsPromiseResult.map((p) => p.choices[0].message.content);
+            console.log(asContents);
             let newLangObject = Object.assign(Object.assign({}, curr), { rawRResultResponse: asContents, jsonDecodedResponse: utils_1.default.canBeDecodedToJsonSafely(asContents)
                     ? utils_1.default.jsonFromEncapsulatedFields(asContents)
-                    : { error: "the output of this partition can't be decoded to JSON" } });
+                    : {
+                        langsyncError: "the output of this partition can't be decoded to JSON",
+                    } });
             delete newLangObject.allPartitionsPromise;
             res.write(sseEvent(`Decoded the output of the ${curr.lang} language successfully, continuing..`, "info", 200));
             result.push(newLangObject);
