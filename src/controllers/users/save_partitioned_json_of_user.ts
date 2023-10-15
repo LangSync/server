@@ -1,7 +1,7 @@
 import json_tiktoken_separator from "../utils/json_tiktoken_separator";
 import insert from "../database/insert";
 import read from "../database/read";
-import { v4 } from "uuid";
+import uuid from "uuid";
 import fs from "fs";
 import configs from "../../configs/openai";
 import { OpenAI } from "openai";
@@ -70,7 +70,7 @@ export default async function save_partitioned_json_of_user(req, res) {
 
     const parsedJson = JSON.parse(uploadedJsonFile);
     const jsonAsParts = json_tiktoken_separator(parsedJson);
-    const idForThisPartitionedJson = v4();
+    const idForThisPartitionedJson = uuid.v4();
 
     let userDocFilter = {
       apiKeys: {

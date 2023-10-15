@@ -1,12 +1,12 @@
-import configs from  "../../configs/server";
-import crypto from  "crypto";
-import Joi from  "joi";
-import update from  "../database/update";
-import findInDb from  "../database/read";
-import insertToDb from  "../database/insert";
-import uuid from  "uuid";
+import configs from "../../configs/server";
+import crypto from "crypto";
+import Joi from "joi";
+import update from "../database/update";
+import findInDb from "../database/read";
+import insertToDb from "../database/insert";
+import { v4 } from "uuid";
 
-export default  async function createBetaUserAccountWithApiKey(req, res) {
+export default async function createBetaUserAccountWithApiKey(req, res) {
   let schema = Joi.object({
     username: Joi.string().min(2).required(),
   });
@@ -39,7 +39,7 @@ export default  async function createBetaUserAccountWithApiKey(req, res) {
     if (!userDoc) {
       let createdUserDoc = await insertToDb("db", "users", {
         username: value.username,
-        userId: uuid.v4(),
+        userId: v4(),
         createdAt: new Date(),
       });
     }
@@ -62,4 +62,4 @@ export default  async function createBetaUserAccountWithApiKey(req, res) {
 
     res.status(500).json({ message: error.message });
   }
-};
+}

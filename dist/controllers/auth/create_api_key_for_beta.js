@@ -18,7 +18,7 @@ const joi_1 = __importDefault(require("joi"));
 const update_1 = __importDefault(require("../database/update"));
 const read_1 = __importDefault(require("../database/read"));
 const insert_1 = __importDefault(require("../database/insert"));
-const uuid_1 = __importDefault(require("uuid"));
+const uuid_1 = require("uuid");
 function createBetaUserAccountWithApiKey(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let schema = joi_1.default.object({
@@ -46,7 +46,7 @@ function createBetaUserAccountWithApiKey(req, res) {
             if (!userDoc) {
                 let createdUserDoc = yield (0, insert_1.default)("db", "users", {
                     username: value.username,
-                    userId: uuid_1.default.v4(),
+                    userId: (0, uuid_1.v4)(),
                     createdAt: new Date(),
                 });
             }
@@ -69,5 +69,4 @@ function createBetaUserAccountWithApiKey(req, res) {
     });
 }
 exports.default = createBetaUserAccountWithApiKey;
-;
 //# sourceMappingURL=create_api_key_for_beta.js.map
