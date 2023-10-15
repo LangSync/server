@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const json_tiktoken_separator_1 = __importDefault(require("../utils/json_tiktoken_separator"));
 const insert_1 = __importDefault(require("../database/insert"));
 const read_1 = __importDefault(require("../database/read"));
-const uuid_1 = __importDefault(require("uuid"));
+const uuid_1 = require("uuid");
 const fs_1 = __importDefault(require("fs"));
 const openai_1 = __importDefault(require("../../configs/openai"));
 const openai_2 = require("openai");
@@ -66,7 +66,7 @@ function save_partitioned_json_of_user(req, res) {
             console.log(uploadedJsonFile);
             const parsedJson = JSON.parse(uploadedJsonFile);
             const jsonAsParts = (0, json_tiktoken_separator_1.default)(parsedJson);
-            const idForThisPartitionedJson = uuid_1.default.v4();
+            const idForThisPartitionedJson = (0, uuid_1.v4)();
             let userDocFilter = {
                 apiKeys: {
                     $elemMatch: {
