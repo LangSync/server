@@ -58,6 +58,7 @@ function makeOpenAIRequest(messageToOpenAI) {
                     { role: "user", content: messageToOpenAI },
                 ],
             });
+            console.log(res.choices[0].message.content + "\n");
             return res;
         }
         catch (error) {

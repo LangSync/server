@@ -3,7 +3,7 @@ import configs from "../../configs/openai";
 
 const enc = getEncoding("gpt2");
 
-function json_tiktoken_separator(parsedJson) {
+async function json_tiktoken_separator(parsedJson) {
   let maxTokens = configs.maxTokens;
 
   let parts = [];
@@ -51,6 +51,8 @@ function json_tiktoken_separator(parsedJson) {
     ) {
       parts.push(latestPart);
     }
+
+    // await new Promise((resolve) => setTimeout(resolve, 10));
   }
 
   return parts;

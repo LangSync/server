@@ -35,15 +35,20 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
       )
     );
     res.write(sseEvent(`Starting localazing..`, "info", 200));
+    // mesure time.
+    let start = Date.now();
     let allPartitionsPromiseResult = await curr.allPartitionsPromise();
+    let end = Date.now();
+    let asSeconds = (end - start) / 1000;
 
     res.write(
       sseEvent(
-        `Partition localized successfully, starting to decode the output of the ${curr.lang} language..`,
+        `Partition localized successfully in ${asSeconds} sec, starting to decode the output of the ${curr.lang} language..`,
         "info",
         200
       )
     );
+
 
     let asContents = allPartitionsPromiseResult.map(
       (p) => p.choices[0].message.content

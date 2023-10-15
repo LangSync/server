@@ -53,6 +53,8 @@ async function makeOpenAIRequest(messageToOpenAI) {
       ],
     });
 
+    console.log(res.choices[0].message.content + "\n");
+
     return res;
   } catch (error) {
     if (error.status === 429) {

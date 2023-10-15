@@ -36,8 +36,12 @@ function resolveAllLangsLangsPromises(langsPromises, res) {
             let curr = langsPromises[index];
             res.write(sseEvent(`\n${curr.lang} (${index + 1}/${langsPromises.length}):`, "info", 200));
             res.write(sseEvent(`Starting localazing..`, "info", 200));
+            // mesure time.
+            let start = Date.now();
             let allPartitionsPromiseResult = yield curr.allPartitionsPromise();
-            res.write(sseEvent(`Partition localized successfully, starting to decode the output of the ${curr.lang} language..`, "info", 200));
+            let end = Date.now();
+            let asSeconds = (end - start) / 1000;
+            res.write(sseEvent(`Partition localized successfully in ${asSeconds} sec, starting to decode the output of the ${curr.lang} language..`, "info", 200));
             let asContents = allPartitionsPromiseResult.map((p) => p.choices[0].message.content);
             let newLangObject = Object.assign(Object.assign({}, curr), { rawRResultResponse: asContents, jsonDecodedResponse: utils_1.default.canBeDecodedToJsonSafely(asContents)
                     ? utils_1.default.jsonFromEncapsulatedFields(asContents)

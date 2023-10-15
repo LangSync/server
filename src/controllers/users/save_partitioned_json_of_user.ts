@@ -68,8 +68,10 @@ export default async function save_partitioned_json_of_user(req, res) {
 
 
     const parsedJson = JSON.parse(uploadedJsonFile);
-    const jsonAsParts = json_tiktoken_separator(parsedJson);
+    const jsonAsParts = await json_tiktoken_separator(parsedJson);
     const idForThisPartitionedJson = v4();
+
+    console.log("partitions length: ", jsonAsParts.length);
 
     let userDocFilter = {
       apiKeys: {
