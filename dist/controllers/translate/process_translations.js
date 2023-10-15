@@ -39,7 +39,6 @@ function resolveAllLangsLangsPromises(langsPromises, res) {
             let allPartitionsPromiseResult = yield curr.allPartitionsPromise();
             res.write(sseEvent(`Partition localized successfully, starting to decode the output of the ${curr.lang} language..`, "info", 200));
             let asContents = allPartitionsPromiseResult.map((p) => p.choices[0].message.content);
-            console.log(asContents);
             let newLangObject = Object.assign(Object.assign({}, curr), { rawRResultResponse: asContents, jsonDecodedResponse: utils_1.default.canBeDecodedToJsonSafely(asContents)
                     ? utils_1.default.jsonFromEncapsulatedFields(asContents)
                     : {
@@ -149,7 +148,6 @@ function processTranslations(req, res) {
                 console.log("including output in response..");
                 response.output = resultTranslations;
             }
-            console.log("111111111111111111111111111111111111111111");
             yield new Promise((resolve) => setTimeout(resolve, 2000));
             res.end(sseEvent(JSON.stringify(response), "result", 200));
         }

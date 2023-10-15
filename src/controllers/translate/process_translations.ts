@@ -49,7 +49,6 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
       (p) => p.choices[0].message.content
     );
 
-    console.log(asContents);
 
     let newLangObject = {
       ...curr,
@@ -57,9 +56,9 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
       jsonDecodedResponse: openAIUtils.canBeDecodedToJsonSafely(asContents)
         ? openAIUtils.jsonFromEncapsulatedFields(asContents)
         : {
-            langsyncError:
-              "the output of this partition can't be decoded to JSON",
-          },
+          langsyncError:
+            "the output of this partition can't be decoded to JSON",
+        },
     };
 
     delete newLangObject.allPartitionsPromise;
@@ -110,8 +109,7 @@ function requestMessagesForOpenAI(partitions, lang) {
 async function _handlePartitionsTranslations(partitions, langs, res) {
   res.write(
     sseEvent(
-      `Starting to localize ${
-        partitions.length
+      `Starting to localize ${partitions.length
       } partitions found from your input file to target languages: ${langs.join(
         ", "
       )}\n`,
@@ -126,8 +124,7 @@ async function _handlePartitionsTranslations(partitions, langs, res) {
 
     res.write(
       sseEvent(
-        `Scheduling the ${currentLang} language localization task. (lang ${
-          indexLang + 1
+        `Scheduling the ${currentLang} language localization task. (lang ${indexLang + 1
         }/${langs.length})`,
         "info",
         200
@@ -282,7 +279,6 @@ export default async function processTranslations(req: Request, res: Response) {
       response.output = resultTranslations;
     }
 
-    console.log("111111111111111111111111111111111111111111");
     await new Promise((resolve) => setTimeout(resolve, 2000));
     res.end(sseEvent(JSON.stringify(response), "result", 200));
   } catch (error) {

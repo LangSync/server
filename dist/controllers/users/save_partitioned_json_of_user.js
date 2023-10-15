@@ -63,7 +63,6 @@ function save_partitioned_json_of_user(req, res) {
             else {
                 console.log("The provided content is acceptable to be processed.");
             }
-            console.log(uploadedJsonFile);
             const parsedJson = JSON.parse(uploadedJsonFile);
             const jsonAsParts = (0, json_tiktoken_separator_1.default)(parsedJson);
             const idForThisPartitionedJson = (0, uuid_1.v4)();
