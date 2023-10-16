@@ -7,6 +7,7 @@ import { Application, Request, Response, NextFunction } from "express";
 
 function sseEvent(message, type, statusCode) {
   let types = ["warn", "info", "error", "result"];
+
   if (!types.includes(type)) {
     type = "info";
   }
@@ -34,8 +35,8 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
         200
       )
     );
-    res.write(sseEvent(`Starting localazing..`, "info", 200));
-    // mesure time.
+    res.write(sseEvent(`Starting localizing..`, "info", 200));
+
     let start = Date.now();
     let allPartitionsPromiseResult = await curr.allPartitionsPromise();
     let end = Date.now();
@@ -49,11 +50,9 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
       )
     );
 
-
     let asContents = allPartitionsPromiseResult.map(
       (p) => p.choices[0].message.content
     );
-
 
     let newLangObject = {
       ...curr,
@@ -61,9 +60,9 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
       jsonDecodedResponse: openAIUtils.canBeDecodedToJsonSafely(asContents)
         ? openAIUtils.jsonFromEncapsulatedFields(asContents)
         : {
-          langsyncError:
-            "the output of this partition can't be decoded to JSON",
-        },
+            langsyncError:
+              "the output of this partition can't be decoded to JSON",
+          },
     };
 
     delete newLangObject.allPartitionsPromise;
@@ -114,7 +113,8 @@ function requestMessagesForOpenAI(partitions, lang) {
 async function _handlePartitionsTranslations(partitions, langs, res) {
   res.write(
     sseEvent(
-      `Starting to localize ${partitions.length
+      `Starting to localize ${
+        partitions.length
       } partitions found from your input file to target languages: ${langs.join(
         ", "
       )}\n`,
@@ -129,7 +129,8 @@ async function _handlePartitionsTranslations(partitions, langs, res) {
 
     res.write(
       sseEvent(
-        `Scheduling the ${currentLang} language localization task. (lang ${indexLang + 1
+        `Scheduling the ${currentLang} language localization task. (lang ${
+          indexLang + 1
         }/${langs.length})`,
         "info",
         200

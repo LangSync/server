@@ -35,8 +35,7 @@ function resolveAllLangsLangsPromises(langsPromises, res) {
         for (let index = 0; index < langsPromises.length; index++) {
             let curr = langsPromises[index];
             res.write(sseEvent(`\n${curr.lang} (${index + 1}/${langsPromises.length}):`, "info", 200));
-            res.write(sseEvent(`Starting localazing..`, "info", 200));
-            // mesure time.
+            res.write(sseEvent(`Starting localizing..`, "info", 200));
             let start = Date.now();
             let allPartitionsPromiseResult = yield curr.allPartitionsPromise();
             let end = Date.now();
