@@ -157,6 +157,11 @@ async function _handlePartitionsTranslations(partitions, langs, res) {
 }
 
 export default async function processTranslations(req: Request, res: Response) {
+  // set sse headers.
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
   let apiKey = req.headers.authorization.split(" ")[1];
 
   if (!apiKey) {
