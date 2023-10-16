@@ -162,6 +162,12 @@ export default async function processTranslations(req: Request, res: Response) {
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+
   let apiKey = req.headers.authorization.split(" ")[1];
 
   if (!apiKey) {
