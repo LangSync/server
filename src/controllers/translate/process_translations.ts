@@ -23,7 +23,7 @@ function sseEvent(message, type, statusCode) {
     statusCode: statusCode,
   };
 
-  return JSON.stringify(obj);
+  return JSON.stringify(obj) + "\n\n";
 }
 
 async function resolveAllLangsLangsPromises(
@@ -199,7 +199,6 @@ export default async function processTranslations(req: Request, res: Response) {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
-
   res.setHeader("X-Accel-Buffering", "no");
 
   res.writeHead(200, {
