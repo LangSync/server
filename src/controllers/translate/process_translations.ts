@@ -5,6 +5,10 @@ import openAIUtils from "../../controllers/openai/utils";
 import * as express from "express";
 import { Application, Request, Response, NextFunction } from "express";
 
+function delay(seconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
 function sseEvent(message, type, statusCode) {
   let types = ["warn", "info", "error", "result"];
 
@@ -22,7 +26,11 @@ function sseEvent(message, type, statusCode) {
   return JSON.stringify(obj);
 }
 
-async function resolveAllLangsLangsPromises(langsPromises, res) {
+async function resolveAllLangsLangsPromises(
+  langsPromises,
+  languageLocalizationMaxDelay,
+  res
+) {
   let result = [];
 
   for (let index = 0; index < langsPromises.length; index++) {
@@ -35,16 +43,41 @@ async function resolveAllLangsLangsPromises(langsPromises, res) {
         200
       )
     );
-    res.write(sseEvent(`Starting localizing..`, "info", 200));
+
+    let maxDelayPromise = delay(languageLocalizationMaxDelay).then(() => {
+      return {
+        timedOut: true,
+      };
+    });
 
     let start = Date.now();
-    let allPartitionsPromiseResult = await curr.allPartitionsPromise();
+
+    let allPartitionsPromiseResult = await Promise.race([
+      curr.allPartitionsPromise(),
+      maxDelayPromise,
+    ]);
+
+    if (allPartitionsPromiseResult.timedOut) {
+      res.write(
+        sseEvent(
+          `The ${curr.lang} language localization task took more than ${languageLocalizationMaxDelay} seconds, skipping..`,
+          "warn",
+          200
+        )
+      );
+
+      // !add a mechanism to to save the AI generated response in the background and expose an option to the user to get it later even if the request timed out here.
+
+      continue;
+    }
+
     let end = Date.now();
+
     let asSeconds = (end - start) / 1000;
 
     res.write(
       sseEvent(
-        `Partition localized successfully in ${asSeconds} sec, starting to decode the output of the ${curr.lang} language..`,
+        `Partition localized successfully in ${asSeconds} seconds, starting to decode the output of the ${curr.lang} language..`,
         "info",
         200
       )
@@ -110,7 +143,12 @@ function requestMessagesForOpenAI(partitions, lang) {
   return result;
 }
 
-async function _handlePartitionsTranslations(partitions, langs, res) {
+async function _handlePartitionsTranslations(
+  partitions,
+  langs,
+  languageLocalizationMaxDelay,
+  res
+) {
   res.write(
     sseEvent(
       `Starting to localize ${
@@ -150,6 +188,7 @@ async function _handlePartitionsTranslations(partitions, langs, res) {
 
   let resultTranslationsAfterPrmiseResolve = await resolveAllLangsLangsPromises(
     resultTranslationsBeforePromiseResolve,
+    languageLocalizationMaxDelay,
     res
   );
 
@@ -180,6 +219,7 @@ export default async function processTranslations(req: Request, res: Response) {
     jsonPartitionsId: Joi.string().min(2).required(),
     langs: Joi.array().items(Joi.string().min(2)).required(),
     includeOutput: Joi.boolean().required(),
+    languageLocalizationMaxDelay: Joi.number().max(1000).required(),
   });
 
   let { error, value } = schema.validate(req.body);
@@ -262,6 +302,7 @@ export default async function processTranslations(req: Request, res: Response) {
     let resultTranslations = await _handlePartitionsTranslations(
       partitions,
       langs,
+      value.languageLocalizationMaxDelay,
       res
     );
 

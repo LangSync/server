@@ -16,6 +16,9 @@ const read_1 = __importDefault(require("../database/read"));
 const update_1 = __importDefault(require("../database/update"));
 const joi_1 = __importDefault(require("joi"));
 const utils_1 = __importDefault(require("../../controllers/openai/utils"));
+function delay(seconds) {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
 function sseEvent(message, type, statusCode) {
     let types = ["warn", "info", "error", "result"];
     if (!types.includes(type)) {
@@ -29,18 +32,29 @@ function sseEvent(message, type, statusCode) {
     };
     return JSON.stringify(obj);
 }
-function resolveAllLangsLangsPromises(langsPromises, res) {
+function resolveAllLangsLangsPromises(langsPromises, languageLocalizationMaxDelay, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let result = [];
         for (let index = 0; index < langsPromises.length; index++) {
             let curr = langsPromises[index];
             res.write(sseEvent(`\n${curr.lang} (${index + 1}/${langsPromises.length}):`, "info", 200));
-            res.write(sseEvent(`Starting localizing..`, "info", 200));
+            let maxDelayPromise = delay(languageLocalizationMaxDelay).then(() => {
+                return {
+                    timedOut: true,
+                };
+            });
             let start = Date.now();
-            let allPartitionsPromiseResult = yield curr.allPartitionsPromise();
+            let allPartitionsPromiseResult = yield Promise.race([
+                curr.allPartitionsPromise(),
+                maxDelayPromise,
+            ]);
+            if (allPartitionsPromiseResult.timedOut) {
+                res.write(sseEvent(`The ${curr.lang} language localization task took more than ${languageLocalizationMaxDelay} seconds, skipping..`, "warn", 200));
+                continue;
+            }
             let end = Date.now();
             let asSeconds = (end - start) / 1000;
-            res.write(sseEvent(`Partition localized successfully in ${asSeconds} sec, starting to decode the output of the ${curr.lang} language..`, "info", 200));
+            res.write(sseEvent(`Partition localized successfully in ${asSeconds} seconds, starting to decode the output of the ${curr.lang} language..`, "info", 200));
             let asContents = allPartitionsPromiseResult.map((p) => p.choices[0].message.content);
             let newLangObject = Object.assign(Object.assign({}, curr), { rawRResultResponse: asContents, jsonDecodedResponse: utils_1.default.canBeDecodedToJsonSafely(asContents)
                     ? utils_1.default.jsonFromEncapsulatedFields(asContents)
@@ -67,7 +81,7 @@ function requestMessagesForOpenAI(partitions, lang) {
     }
     return result;
 }
-function _handlePartitionsTranslations(partitions, langs, res) {
+function _handlePartitionsTranslations(partitions, langs, languageLocalizationMaxDelay, res) {
     return __awaiter(this, void 0, void 0, function* () {
         res.write(sseEvent(`Starting to localize ${partitions.length} partitions found from your input file to target languages: ${langs.join(", ")}\n`, "info", 200));
         let resultTranslationsBeforePromiseResolve = [];
@@ -83,12 +97,22 @@ function _handlePartitionsTranslations(partitions, langs, res) {
                 allPartitionsPromise: langAllPartitionsPromise,
             });
         }
-        let resultTranslationsAfterPrmiseResolve = yield resolveAllLangsLangsPromises(resultTranslationsBeforePromiseResolve, res);
+        let resultTranslationsAfterPrmiseResolve = yield resolveAllLangsLangsPromises(resultTranslationsBeforePromiseResolve, languageLocalizationMaxDelay, res);
         return resultTranslationsAfterPrmiseResolve;
     });
 }
 function processTranslations(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+        res.setHeader("X-Accel-Buffering", "no");
+        res.writeHead(200, {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+            "X-Accel-Buffering": "no",
+        });
         let apiKey = req.headers.authorization.split(" ")[1];
         if (!apiKey) {
             return res.end(sseEvent("No API key provided.", "error", 401));
@@ -97,6 +121,7 @@ function processTranslations(req, res) {
             jsonPartitionsId: joi_1.default.string().min(2).required(),
             langs: joi_1.default.array().items(joi_1.default.string().min(2)).required(),
             includeOutput: joi_1.default.boolean().required(),
+            languageLocalizationMaxDelay: joi_1.default.number().max(1000).required(),
         });
         let { error, value } = schema.validate(req.body);
         if (error) {
@@ -134,7 +159,7 @@ function processTranslations(req, res) {
                 res.write(sseEvent("Partitions found & validated successfully, continuing..\n", "info", 200));
             }
             let partitions = partitionsDoc.jsonAsParts;
-            let resultTranslations = yield _handlePartitionsTranslations(partitions, langs, res);
+            let resultTranslations = yield _handlePartitionsTranslations(partitions, langs, value.languageLocalizationMaxDelay, res);
             res.write(sseEvent("Localization process is done, saving the outputs to our database..", "info", 200));
             yield (0, update_1.default)("db", "jsonPartitions", filterDoc, {
                 $addToSet: {
