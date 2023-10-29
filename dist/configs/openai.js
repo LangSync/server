@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function minuteToSeconds(minutes) {
     return minutes * 60;
 }
-let modelMaximumTokens = 1000;
+let modelMaximumTokens = 1500;
 exports.default = {
     jsonUserMessage: (partition, lang) => {
         let message = `Translate this to ${lang}: ${partition}`;

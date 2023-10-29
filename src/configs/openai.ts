@@ -1,7 +1,7 @@
 function minuteToSeconds(minutes) {
   return minutes * 60;
 }
-let modelMaximumTokens = 1000;
+let modelMaximumTokens = 1300;
 
 export default {
   jsonUserMessage: (partition, lang) => {

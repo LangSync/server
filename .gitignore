@@ -3,3 +3,4 @@ parts.txt
 sample.json
 .env
 dist/
+*.conf

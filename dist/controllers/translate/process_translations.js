@@ -30,7 +30,7 @@ function sseEvent(message, type, statusCode) {
         date: new Date().toISOString(),
         statusCode: statusCode,
     };
-    return JSON.stringify(obj);
+    return JSON.stringify(obj) + "\n\n";
 }
 function resolveAllLangsLangsPromises(langsPromises, languageLocalizationMaxDelay, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -50,6 +50,7 @@ function resolveAllLangsLangsPromises(langsPromises, languageLocalizationMaxDela
             ]);
             if (allPartitionsPromiseResult.timedOut) {
                 res.write(sseEvent(`The ${curr.lang} language localization task took more than ${languageLocalizationMaxDelay} seconds, skipping..`, "warn", 200));
+                // !add a mechanism to to save the AI generated response in the background and expose an option to the user to get it later even if the request timed out here.
                 continue;
             }
             let end = Date.now();
