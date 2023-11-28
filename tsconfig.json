@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "esModuleInterop": true,
-    "target": "es6",
+    "target": "ES2021", // add this line to use ES2021
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "strictNullChecks": false,
     "noImplicitThis": false,
     "alwaysStrict": false,

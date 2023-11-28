@@ -1,12 +1,34 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import dbConfig from "../../configs/db";
 
-const client = new MongoClient(dbConfig.uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+export class LangSyncDatabaseClient {
+  constructor() {}
 
-export default  client;
+  static _instance: LangSyncDatabaseClient = new LangSyncDatabaseClient();
+
+  static get instance(): LangSyncDatabaseClient {
+    return this._instance;
+  }
+
+  static client: MongoClient = new MongoClient(dbConfig.uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  });
+
+  static async init(): Promise<void> {
+    try {
+      await this.client.connect();
+
+      await this.client.db("admin").command({ ping: 1 });
+
+      LangSyncLogger.instance.log({
+        message: "Database connection established successfully.",
+      });
+    } catch (err) {
+      console.dir(err);
+    }
+  }
+}

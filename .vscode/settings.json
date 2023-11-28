@@ -1,7 +1,11 @@
 {
   "workbench.colorTheme": "Ayu Dark Bordered",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "[nginx]": {
     "editor.defaultFormatter": "ahmadalli.vscode-nginx-conf"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

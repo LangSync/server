@@ -1,7 +1,8 @@
 import Joi from "joi";
-import insertToDb from "../../controllers/database/insert";
+import { Request, Response } from "express";
+import { LangSyncDatabase } from "../database/database";
 
-export default  async function processCliException(req, res) {
+export default async function processCliException(req: Request, res: Response) {
   let scheme = Joi.object({
     exception: Joi.string().required(),
     stacktrace: Joi.string().required(),
@@ -15,16 +16,19 @@ export default  async function processCliException(req, res) {
   let { error, value } = scheme.validate(req.body);
 
   if (error) {
-    console.log(error);
+    LangSyncLogger.instance.log({
+      message: error.toString(),
+      type: loggingTypes.error,
+    });
     return res.status(400).json({ error: error });
   }
 
   try {
-    await insertToDb("db", "cli_exceptions", value);
+    await LangSyncDatabase.instance.insert.cliException(value);
 
     return res.status(200).json({ message: "success" });
   } catch (error) {
-    console.log(error);
+    LangSyncLogger.instance.log({ message: error, type: loggingTypes.error });
     return res.status(500).json({ error: error });
   }
-};
+}

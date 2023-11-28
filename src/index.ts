@@ -6,13 +6,12 @@ import configs from "./configs/server";
 
 import router from "./routes/router";
 
-import init from "./controllers/database/init";
-
 import morgan from "morgan";
+import { LangSyncDatabaseClient } from "./controllers/database/client";
 
 const langSyncServerApp = express();
 
-(async () => await init())();
+(async () => await LangSyncDatabaseClient.init())();
 
 langSyncServerApp.use(morgan(":method :url :status - :response-time ms"));
 
@@ -23,5 +22,7 @@ langSyncServerApp.use(express.urlencoded({ extended: true }));
 langSyncServerApp.use("/", router);
 
 langSyncServerApp.listen(configs.port, () => {
-  console.log(`server is running on localhost:${configs.port}`);
+  LangSyncLogger.instance.log({
+    message: `LangSync server is running on localhost:${configs.port}`,
+  });
 });

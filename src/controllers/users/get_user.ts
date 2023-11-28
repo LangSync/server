@@ -1,7 +1,8 @@
-import readMany from  "../../controllers/database/readMany";
-import Joi from  "joi";
+import Joi from "joi";
+import { Request, Response } from "express";
+import { LangSyncDatabase } from "../database/database";
 
-export default  async function getUser(req, res) {
+export default async function getUser(req: Request, res: Response) {
   if (!req.headers["authorization"]) {
     return res.status(400).json({
       message:
@@ -13,7 +14,7 @@ export default  async function getUser(req, res) {
     let apiKey = req.headers.authorization.split(" ")[1];
 
     if (!apiKey) {
-      res   
+      res
         .sendStatus(400)
         .json({ message: "Invalid API key, no user match that key" });
     }
@@ -43,7 +44,11 @@ export default  async function getUser(req, res) {
       },
     ];
 
-    let userDocumments = await readMany("db", "users", aggregateQuery);
+    let userDocumments = await LangSyncDatabase.instance.read.readMany(
+      "db",
+      "users",
+      aggregateQuery
+    );
 
     let userDocumment = userDocumments[0];
 
@@ -68,11 +73,11 @@ export default  async function getUser(req, res) {
         outputLangs: {
           $reduce: {
             input: "$output",
-            initialValue: [],
+            initialValue: <any>[],
             in: { $concatArrays: ["$$value", ["$$this.lang"]] },
           },
         },
-        partitionId: 1,
+        operationId: 1,
       };
 
       let localizedDocsAggregateQuery = [
@@ -84,7 +89,7 @@ export default  async function getUser(req, res) {
         },
       ];
 
-      let localizationDocs = await readMany(
+      let localizationDocs = await LangSyncDatabase.instance.read.readMany(
         "db",
         "jsonPartitions",
         localizedDocsAggregateQuery
@@ -98,10 +103,13 @@ export default  async function getUser(req, res) {
       });
     }
   } catch (error) {
-    console.log(error);
+    LangSyncLogger.instance.log({
+      message: error,
+      type: loggingTypes.error,
+    });
 
     res.status(500).json({
       message: "Internal Server Error",
     });
   }
-};
+}

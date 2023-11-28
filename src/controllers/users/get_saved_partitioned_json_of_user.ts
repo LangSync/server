@@ -1,9 +1,14 @@
 import Joi from "joi";
-import readMany from "../database/readMany";
+import { Request, Response } from "express";
 
-export default  async function getSavedPartitionedJsonOfUser(req, res) {
+import { LangSyncDatabase } from "../database/database";
+
+export default async function getSavedPartitionedJsonOfUser(
+  req: Request,
+  res: Response
+) {
   let schema = Joi.object({
-    jsonPartitionsId: Joi.string().min(2).required(),
+    operationId: Joi.string().min(2).required(),
   });
 
   let { error, value } = schema.validate(req.body);
@@ -12,11 +17,11 @@ export default  async function getSavedPartitionedJsonOfUser(req, res) {
     return res.status(400).json({ message: error });
   }
 
-  let { jsonPartitionsId } = value;
+  let { operationId } = value;
 
   try {
     let docFilter = {
-      partitionId: jsonPartitionsId,
+      operationId: operationId,
     };
 
     let projection = {
@@ -38,7 +43,7 @@ export default  async function getSavedPartitionedJsonOfUser(req, res) {
       // apiKey: 0,
       // jsonAsParts: 0,
       // createdAt: 1,
-      // partitionId: 1,
+      // operationId: 1,
     };
 
     let aggregateQuery = [
@@ -50,7 +55,11 @@ export default  async function getSavedPartitionedJsonOfUser(req, res) {
       },
     ];
 
-    let docs = await readMany("db", "jsonPartitions", aggregateQuery);
+    let docs = await LangSyncDatabase.instance.read.readMany(
+      "db",
+      "jsonPartitions",
+      aggregateQuery
+    );
 
     let doc = docs[0];
 
@@ -62,7 +71,10 @@ export default  async function getSavedPartitionedJsonOfUser(req, res) {
       return res.status(200).json(doc);
     }
   } catch (error) {
-    console.log(error);
+    LangSyncLogger.instance.log({
+      message: error,
+      type: loggingTypes.error,
+    });
     return res.status(500).json({ message: error });
   }
-};
+}
