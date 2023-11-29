@@ -1,15 +1,15 @@
-import { delay, sseEvent } from "../utils/utils";
 import { Response } from "express";
-import * as utils from "../utils/utils";
 import { LocalizationProcessor } from "./localization_launguage_processor";
 import OpenAI from "openai";
+import { sseEvent } from "../utils/sse";
+import { GeneralUtils } from "../utils/general";
 
 export class TasksResolver {
   static async timeoutPromise(
     languageLocalizationMaxDelay: number
   ): Promise<any> {
     try {
-      await delay(languageLocalizationMaxDelay);
+      await GeneralUtils.delay(languageLocalizationMaxDelay);
       return {
         timedOut: true,
       };
@@ -80,8 +80,8 @@ export class TasksResolver {
       let newLangObject = {
         ...curr,
         rawRResultResponse: asContents,
-        jsonDecodedResponse: utils.canBeDecodedToJsonSafely(asContents)
-          ? utils.jsonFromEncapsulatedFields(asContents)
+        jsonDecodedResponse: GeneralUtils.canBeDecodedToJsonSafely(asContents)
+          ? GeneralUtils.jsonFromEncapsulatedFields(asContents)
           : {
               langsyncError:
                 "the output of this partition can't be decoded to JSON",

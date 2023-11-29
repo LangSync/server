@@ -99,4 +99,14 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
       }
     }
   }
+
+  partitionLocalizationPrompt(partition: any, lang: string): string {
+    return configs.jsonUserMessage(partition, lang);
+  }
+
+  async makeOpenAIRequest(
+    messageToOpenAI: string
+  ): Promise<OpenAI.Chat.Completions.ChatCompletion> {
+    return await new OpenAIClient().process(messageToOpenAI);
+  }
 }

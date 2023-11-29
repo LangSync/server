@@ -1,9 +1,11 @@
 import Joi from "joi";
 import { Request, Response } from "express";
-import { extractAndVerifyApiKeyExistence, sseEvent } from "../utils/utils";
 import { LangSyncDatabase } from "../database/database";
 import { TasksResolver } from "./tasks_resolver";
 import { LangSyncLogger } from "../utils/logger";
+import { sseEvent } from "../utils/sse";
+import { GeneralUtils } from "../utils/general";
+import { extractAndVerifyApiKeyExistence } from "../auth/validate_api_key_with_user_token";
 
 // @ts-ignore
 export default async function processTranslations(req: Request, res: Response) {

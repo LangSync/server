@@ -1,9 +1,6 @@
 import OpenAI from "openai";
-import {
-  generateMessageToOpenAI,
-  makeOpenAIRequest,
-  sseEvent,
-} from "../utils/utils";
+import { sseEvent } from "../utils/sse";
+import { OpenAIClient } from "../../ai_clients/openAI";
 
 export class LocalizationProcessor {
   constructor(private options: LocalizationProcessorOptions) {}
@@ -43,10 +40,8 @@ export class LocalizationProcessor {
     for (let index = 0; index < partitions.length; index++) {
       const currentPartition = partitions[index];
 
-      let messageToOpenAI: string = generateMessageToOpenAI(
-        currentPartition,
-        lang
-      );
+      let messageToOpenAI: string =
+        new OpenAIClient().partitionLocalizationPrompt(currentPartition, lang);
 
       result.push(messageToOpenAI);
     }
@@ -58,7 +53,8 @@ export class LocalizationProcessor {
     openAIMessages: string[]
   ): (() => Promise<OpenAI.Chat.Completions.ChatCompletion>)[] {
     return openAIMessages.map(
-      (messageToOpenAI) => () => makeOpenAIRequest(messageToOpenAI)
+      (messageToOpenAI) => () =>
+        new OpenAIClient().makeOpenAIRequest(messageToOpenAI)
     );
   }
 }

@@ -2,9 +2,9 @@ import Joi from "joi";
 import { Request, Response } from "express";
 
 import { LangSyncDatabase } from "../database/database";
-import { extractAndVerifyApiKeyExistence } from "../utils/utils";
 import { LangSyncLogger } from "../utils/logger";
 import { loggingTypes } from "../../enum";
+import { extractAndVerifyApiKeyExistence } from "../auth/validate_api_key_with_user_token";
 
 export default async function fileOperationOfUser(req: Request, res: Response) {
   await extractAndVerifyApiKeyExistence(

@@ -1,9 +1,10 @@
 import fs from "fs";
-import * as utils from "../controllers/utils/utils";
+import * as utils from "../controllers/utils/general";
 import { v4 } from "uuid";
 import { OpenAIClient } from "../ai_clients/openAI";
 import { LangSyncLogger } from "../controllers/utils/logger";
 import { loggingTypes } from "../enum";
+import { parsedFileContentPartsSeparatorForOpenAI } from "../controllers/utils/partitions_splitter";
 
 export class JsonAdapter implements BaseAdapter {
   constructor(private filePath: string) {}
@@ -72,8 +73,9 @@ export class JsonAdapter implements BaseAdapter {
 
     let parsed: any = this.parseString(asString);
 
-    let asParts: string[] =
-      await utils.parsedFileContentPartsSeparatorForOpenAI(parsed);
+    let asParts: string[] = await parsedFileContentPartsSeparatorForOpenAI(
+      parsed
+    );
 
     new LangSyncLogger().log({
       message: `File named ${this.filePath
