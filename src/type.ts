@@ -4,7 +4,7 @@ type HarmOptions = { fileContent: string; throwIfHarming: boolean };
 
 type LogOptions = {
   message: string;
-  type?: loggingTypes;
+  type?: any;
   data?: any;
 };
 

@@ -1,6 +1,8 @@
 import Joi from "joi";
 import { Request, Response } from "express";
 import { LangSyncDatabase } from "../database/database";
+import { LangSyncLogger } from "../utils/logger";
+import { loggingTypes } from "../../enum";
 
 export default async function processCliException(req: Request, res: Response) {
   let scheme = Joi.object({
@@ -16,7 +18,7 @@ export default async function processCliException(req: Request, res: Response) {
   let { error, value } = scheme.validate(req.body);
 
   if (error) {
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: error.toString(),
       type: loggingTypes.error,
     });
@@ -28,7 +30,7 @@ export default async function processCliException(req: Request, res: Response) {
 
     return res.status(200).json({ message: "success" });
   } catch (error: Error | any) {
-    LangSyncLogger.instance.log({ message: error, type: loggingTypes.error });
+    new LangSyncLogger().log({ message: error, type: loggingTypes.error });
     return res.status(500).json({ error: error });
   }
 }

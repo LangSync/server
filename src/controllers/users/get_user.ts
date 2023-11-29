@@ -1,7 +1,8 @@
-import Joi from "joi";
 import { Request, Response } from "express";
 import { LangSyncDatabase } from "../database/database";
-
+import { LangSyncLogger } from "../utils/logger";
+import { loggingTypes } from "../../enum";
+// @ts-ignore
 export default async function getUser(req: Request, res: Response) {
   if (!req.headers["authorization"]) {
     return res.status(400).json({
@@ -103,7 +104,7 @@ export default async function getUser(req: Request, res: Response) {
       });
     }
   } catch (error: Error | any) {
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: error,
       type: loggingTypes.error,
     });

@@ -1,5 +1,6 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import dbConfig from "../../configs/db";
+import { LangSyncLogger } from "../utils/logger";
 
 export class LangSyncDatabaseClient {
   constructor() {}
@@ -24,7 +25,7 @@ export class LangSyncDatabaseClient {
 
       await this.client.db("admin").command({ ping: 1 });
 
-      LangSyncLogger.instance.log({
+      new LangSyncLogger().log({
         message: "Database connection established successfully.",
       });
     } catch (err) {

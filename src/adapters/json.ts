@@ -1,7 +1,9 @@
 import fs from "fs";
 import * as utils from "../controllers/utils/utils";
-import uuid from "uuid";
+import { v4 } from "uuid";
 import { OpenAIClient } from "../ai_clients/openAI";
+import { LangSyncLogger } from "../controllers/utils/logger";
+import { loggingTypes } from "../enum";
 
 export class JsonAdapter implements BaseAdapter {
   constructor(private filePath: string) {}
@@ -14,12 +16,14 @@ export class JsonAdapter implements BaseAdapter {
   allowMultipleUniqueIds: boolean = false;
 
   deleteFile() {
-    fs.unlinkSync(this.filePath);
+    if (fs.existsSync(this.filePath)) {
+      fs.unlinkSync(this.filePath);
+    }
   }
 
   readFileAsString(): string {
     let asString: string = fs.readFileSync(this.filePath, "utf8");
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: `File named ${this.filePath
         .split("/")
         .pop()} has been loaded as a string.`,
@@ -32,12 +36,12 @@ export class JsonAdapter implements BaseAdapter {
   parseString(fileContent: string): any {
     return JSON.parse(fileContent);
   }
-
+  // @ts-ignore
   async isHarming(options: HarmOptions): Promise<boolean> {
     let isHarming: boolean = await this.aiClient.isHarming(options.fileContent);
 
     if (isHarming) {
-      LangSyncLogger.instance.log({
+      new LangSyncLogger().log({
         message:
           "The provided content violates our policy, and so it is unacceptable to be processed.",
       });
@@ -49,7 +53,7 @@ export class JsonAdapter implements BaseAdapter {
       } else {
       }
     } else {
-      LangSyncLogger.instance.log({
+      new LangSyncLogger().log({
         message: "The provided content is acceptable to be processed.",
       });
 
@@ -60,6 +64,7 @@ export class JsonAdapter implements BaseAdapter {
   async asPartsForOpenAI(): Promise<string[]> {
     let asString: string = this.readFileAsString();
 
+    // @ts-ignore
     let isHarming: boolean = await this.isHarming({
       fileContent: asString,
       throwIfHarming: true,
@@ -70,7 +75,7 @@ export class JsonAdapter implements BaseAdapter {
     let asParts: string[] =
       await utils.parsedFileContentPartsSeparatorForOpenAI(parsed);
 
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: `File named ${this.filePath
         .split("/")
         .pop()} has been split into ${asParts.length} parts.`,
@@ -90,7 +95,8 @@ export class JsonAdapter implements BaseAdapter {
       );
     }
 
-    let generatedId = uuid.v4();
+    const generatedId = v4();
+
     this.numberOfGeneratedUniqueIds++;
 
     return generatedId;

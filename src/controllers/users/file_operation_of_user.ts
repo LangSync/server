@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 
 import { LangSyncDatabase } from "../database/database";
 import { extractAndVerifyApiKeyExistence } from "../utils/utils";
+import { LangSyncLogger } from "../utils/logger";
+import { loggingTypes } from "../../enum";
 
 export default async function fileOperationOfUser(req: Request, res: Response) {
   await extractAndVerifyApiKeyExistence(
@@ -41,7 +43,7 @@ export default async function fileOperationOfUser(req: Request, res: Response) {
       return res.status(200).json(doc);
     }
   } catch (error: Error | any) {
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: error,
       type: loggingTypes.error,
     });

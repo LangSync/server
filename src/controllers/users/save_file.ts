@@ -1,29 +1,32 @@
 import { Request, Response } from "express";
-import fs from "fs";
 import * as utils from "../utils/utils";
 import verifyApiKeyWithUserAuthToken from "../auth/validate_api_key_with_user_token";
 import { JsonAdapter } from "../../adapters/json";
 import { LangSyncDatabase } from "../database/database";
+import { LangSyncLogger } from "../utils/logger";
+import { loggingTypes } from "../../enum";
 
 export default async function saveFile(req: Request, res: Response) {
-  try {
-    let fileType = req.params.fileType;
-    utils.validateFileTypeSupport(fileType);
+  let fileType = req.params.fileType;
 
+  let filePath: string = utils.getFilePath(req.file!.path);
+
+  utils.validateFileTypeSupport(fileType);
+
+  let adapter = new JsonAdapter(filePath);
+
+  try {
     let apiKey: ExtractedApiKey = utils.extractApiKeyFromAuthorizationHeader(
       req.headers.authorization ?? ""
     );
 
     await verifyApiKeyWithUserAuthToken(apiKey);
 
-    let filePath: string = utils.getFilePath(req.file!.path);
-
-    let adapter = new JsonAdapter(filePath);
-    let fileAsParts = adapter.asPartsForOpenAI();
-
-    let operationId = adapter.generateUniqueId();
+    let fileAsParts = await adapter.asPartsForOpenAI();
 
     let userDoc = await LangSyncDatabase.instance.read.userDocByApiKey(apiKey);
+
+    let operationId = adapter.generateUniqueId();
 
     await LangSyncDatabase.instance.insert.fileOperation({
       userId: userDoc.userId,
@@ -39,10 +42,12 @@ export default async function saveFile(req: Request, res: Response) {
       operationId: operationId,
     });
   } catch (error: Error | any) {
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: error,
       type: loggingTypes.error,
     });
+
+    adapter.deleteFile();
 
     res.status(500).json({ message: "Internal server error", error: error });
   }

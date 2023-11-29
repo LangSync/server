@@ -1,14 +1,8 @@
-import { Filter } from "mongodb";
+import { Document, Filter } from "mongodb";
 import { LangSyncDatabaseClient } from "./client";
 
 export class LangSyncDatabaseDelete {
   constructor() {}
-
-  _instance: LangSyncDatabaseDelete = new LangSyncDatabaseDelete();
-
-  get instance(): LangSyncDatabaseDelete {
-    return this._instance;
-  }
 
   delete(
     databaseName: string,

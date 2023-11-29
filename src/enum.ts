@@ -1,4 +1,4 @@
-enum loggingTypes {
+export enum loggingTypes {
   info,
   warn,
   error,
@@ -6,6 +6,6 @@ enum loggingTypes {
   warning,
 }
 
-enum LangSyncAllowedFileTypes {
+export enum LangSyncAllowedFileTypes {
   json,
 }

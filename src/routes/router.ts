@@ -10,9 +10,9 @@ import processCliException from "../controllers/cli/process_exceptions";
 import multer from "multer";
 let upload = multer({ dest: "uploads/" });
 
-router.post(":fileType/save-file", upload.single("sourceFile"), saveFile);
+router.post("/:fileType/save-file", upload.single("sourceFile"), saveFile);
 
-router.get("file-operation-of-user", fileOperationOfUser);
+router.get("/file-operation-of-user", fileOperationOfUser);
 
 router.post("/process-translation", processTranslations);
 

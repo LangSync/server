@@ -3,15 +3,17 @@ import { getEncoding } from "js-tiktoken";
 import configs from "../../configs/openai";
 import { OpenAIClient } from "../../ai_clients/openAI";
 import verifyApiKeyWithUserAuthToken from "../auth/validate_api_key_with_user_token";
+import { LangSyncLogger } from "./logger";
+import { LangSyncAllowedFileTypes, loggingTypes } from "../../enum";
 const enc = getEncoding("gpt2");
 
 export function canBeDecodedToJsonSafely(encapsulatedFieldsString: string[]) {
   try {
-    let decoded = jsonFromEncapsulatedFields(encapsulatedFieldsString);
+    jsonFromEncapsulatedFields(encapsulatedFieldsString);
 
     return true;
   } catch (error: Error | any) {
-    LangSyncLogger.instance.log({
+    new LangSyncLogger().log({
       message: error,
       type: loggingTypes.error,
     });
@@ -67,6 +69,11 @@ export function validateFileTypeSupport(fileType: string): void {
 
   if (!exists) {
     throw new Error("File type not supported.");
+  } else {
+    new LangSyncLogger().log({
+      message: `File type ${fileType} is supported.`,
+      type: loggingTypes.info,
+    });
   }
 }
 export async function parsedFileContentPartsSeparatorForOpenAI(

@@ -1,5 +1,7 @@
 import { OpenAI } from "openai";
 import configs from "../configs/openai";
+import { LangSyncLogger } from "../controllers/utils/logger";
+import { loggingTypes } from "../enum";
 export class OpenAIClient implements ArtificialIntelligenceBase {
   constructor() {
     this.init(<string>configs.openAI);
@@ -19,7 +21,7 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
         input: content.toString(),
       });
 
-      LangSyncLogger.instance.log({
+      new LangSyncLogger().log({
         message: "Moderation request has been processed by OpenAI.",
         type: loggingTypes.info,
       });
@@ -29,7 +31,7 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
       return typeof flagged === "boolean" ? flagged : false;
     } catch (error: Error | any) {
       if (error.status === 429) {
-        LangSyncLogger.instance.log({
+        new LangSyncLogger().log({
           message:
             "OpenAI API rate limit reached, waiting 20 seconds for next moderation request",
           type: loggingTypes.warning,
@@ -42,7 +44,7 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
           )
         );
 
-        LangSyncLogger.instance.log({
+        new LangSyncLogger().log({
           message: "20 seconds passed, continuing request",
           type: loggingTypes.info,
         });
@@ -69,14 +71,14 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
         ],
       });
 
-      LangSyncLogger.instance.log({
+      new LangSyncLogger().log({
         message: res.choices[0].message.content + "\n",
       });
 
       return res;
     } catch (error: Error | any) {
       if (error.status === 429) {
-        LangSyncLogger.instance.log({
+        new LangSyncLogger().log({
           message:
             "OpenAI API rate limit reached, waiting 20 seconds for next request",
         });
@@ -88,7 +90,7 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
           )
         );
 
-        LangSyncLogger.instance.log({
+        new LangSyncLogger().log({
           message: "20 seconds passed, repeating request..",
         });
         return await this.process(messageToOpenAI);

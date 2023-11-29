@@ -1,14 +1,8 @@
-import { Filter, UpdateFilter } from "mongodb";
+import { Document, Filter, UpdateFilter } from "mongodb";
 import { LangSyncDatabaseClient } from "./client";
 
 export class LangSyncDatabaseUpdate {
   constructor() {}
-
-  static _instance: LangSyncDatabaseUpdate = new LangSyncDatabaseUpdate();
-
-  static get instance(): LangSyncDatabaseUpdate {
-    return this._instance;
-  }
 
   updateOperationDoc(
     operationId: string,
@@ -17,9 +11,9 @@ export class LangSyncDatabaseUpdate {
     const filterDoc = {
       operationId: operationId,
     };
-
     return this.update("db", "jsonPartitions", filterDoc, {
       $addToSet: {
+        //@ts-ignore
         output: {
           $each: resultTranslations,
         },

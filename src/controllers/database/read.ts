@@ -1,4 +1,4 @@
-import { Filter, WithId } from "mongodb";
+import { Document, Filter } from "mongodb";
 import { LangSyncDatabaseClient } from "./client";
 
 export class LangSyncDatabaseRead {
@@ -23,12 +23,6 @@ export class LangSyncDatabaseRead {
   }
 
   constructor() {}
-
-  _instance: LangSyncDatabaseRead = new LangSyncDatabaseRead();
-
-  get instance(): LangSyncDatabaseRead {
-    return this._instance;
-  }
 
   async userOperations(operationId: string): Promise<any[]> {
     let docFilter = {

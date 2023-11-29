@@ -1,4 +1,5 @@
 import { LangSyncDatabase } from "../database/database";
+import { LangSyncLogger } from "../utils/logger";
 
 export default async function verifyApiKeyWithUserAuthToken(
   apiKey: ExtractedApiKey,
@@ -9,7 +10,7 @@ export default async function verifyApiKeyWithUserAuthToken(
   if (!document) {
     throw new Error("No user with this API key found.");
   } else {
-    LangSyncLogger.instance.log({ message: "User found with this API key." });
+    new LangSyncLogger().log({ message: "User found with this API key." });
 
     onVerified && onVerified();
 

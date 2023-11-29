@@ -22,7 +22,5 @@ langSyncServerApp.use(express.urlencoded({ extended: true }));
 langSyncServerApp.use("/", router);
 
 langSyncServerApp.listen(configs.port, () => {
-  LangSyncLogger.instance.log({
-    message: `LangSync server is running on localhost:${configs.port}`,
-  });
+  console.log(`LangSync server is running on localhost:${configs.port}`);
 });

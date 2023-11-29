@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    "moduleResolution": "Node",
+    "preserveConstEnums": true,
     "module": "CommonJS",
     "esModuleInterop": true,
-    "target": "ES2021", // add this line to use ES2021
-    "moduleResolution": "node",
+    "target": "ES2022",
+    "lib": ["ES2021.String"],
     "sourceMap": true,
     "strict": true,
     "noImplicitAny": true,
@@ -21,6 +23,5 @@
     "removeComments": true,
     "allowJs": false
   },
-  "lib": ["es2015"],
   "exclude": ["node_modules"]
 }

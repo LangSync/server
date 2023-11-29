@@ -3,7 +3,9 @@ import { Request, Response } from "express";
 import { extractAndVerifyApiKeyExistence, sseEvent } from "../utils/utils";
 import { LangSyncDatabase } from "../database/database";
 import { TasksResolver } from "./tasks_resolver";
+import { LangSyncLogger } from "../utils/logger";
 
+// @ts-ignore
 export default async function processTranslations(req: Request, res: Response) {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -78,7 +80,7 @@ export default async function processTranslations(req: Request, res: Response) {
       })
     );
 
-    const saveFileOperationDoc =
+    let saveFileOperationDoc =
       await LangSyncDatabase.instance.read.savedFileByOperationId(operationId);
 
     if (!saveFileOperationDoc) {
@@ -137,7 +139,7 @@ export default async function processTranslations(req: Request, res: Response) {
     };
 
     if (includeOutput) {
-      LangSyncLogger.instance.log({
+      new LangSyncLogger().log({
         message: "including output in response..",
       });
       response.output = resultTranslations;
