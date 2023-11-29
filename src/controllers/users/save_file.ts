@@ -11,11 +11,12 @@ export default async function saveFile(req: Request, res: Response) {
     utils.validateFileTypeSupport(fileType);
 
     let apiKey: ExtractedApiKey = utils.extractApiKeyFromAuthorizationHeader(
-      req.headers.authorization
+      req.headers.authorization ?? ""
     );
+
     await verifyApiKeyWithUserAuthToken(apiKey);
 
-    let filePath: string = utils.getFilePath(req.file.path);
+    let filePath: string = utils.getFilePath(req.file!.path);
 
     let adapter = new JsonAdapter(filePath);
     let fileAsParts = adapter.asPartsForOpenAI();
@@ -37,7 +38,7 @@ export default async function saveFile(req: Request, res: Response) {
       message: "Successfully saved partitioned json",
       operationId: operationId,
     });
-  } catch (error) {
+  } catch (error: Error | any) {
     LangSyncLogger.instance.log({
       message: error,
       type: loggingTypes.error,

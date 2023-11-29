@@ -30,10 +30,45 @@ export class LangSyncDatabaseRead {
     return this._instance;
   }
 
+  async userOperations(operationId: string): Promise<any[]> {
+    let docFilter = {
+      operationId: operationId,
+    };
+
+    let projection = {
+      _id: 1,
+      output: {
+        $map: {
+          input: "$output",
+          as: "output",
+          in: {
+            // show only the "lang" field of the item.
+            lang: "$$output.lang",
+            localizedAt: "$$output.localizedAt",
+            jsonDecodedResponse: "$$output.jsonDecodedResponse",
+          },
+        },
+      },
+    };
+
+    let aggregateQuery = [
+      {
+        $match: docFilter,
+      },
+      {
+        $project: projection,
+      },
+    ];
+
+    let docs = this.readMany("db", "jsonPartitions", aggregateQuery);
+
+    return docs;
+  }
+
   async read(
     databaseName: string,
     collectionName: string,
-    document: Filter<Document>
+    document: Filter<Document | any>
   ) {
     return LangSyncDatabaseClient.client
       .db(databaseName)

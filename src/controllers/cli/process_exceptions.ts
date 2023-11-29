@@ -27,7 +27,7 @@ export default async function processCliException(req: Request, res: Response) {
     await LangSyncDatabase.instance.insert.cliException(value);
 
     return res.status(200).json({ message: "success" });
-  } catch (error) {
+  } catch (error: Error | any) {
     LangSyncLogger.instance.log({ message: error, type: loggingTypes.error });
     return res.status(500).json({ error: error });
   }

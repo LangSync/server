@@ -10,7 +10,7 @@ export class LangSyncDatabaseClient {
     return this._instance;
   }
 
-  static client: MongoClient = new MongoClient(dbConfig.uri, {
+  static client: MongoClient = new MongoClient(<string>dbConfig.uri, {
     serverApi: {
       version: ServerApiVersion.v1,
       strict: true,

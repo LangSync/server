@@ -13,7 +13,7 @@ export class TasksResolver {
       return {
         timedOut: true,
       };
-    } catch (error) {}
+    } catch (error: Error | any) {}
   }
   static async resolveAllLangsLangsPromises(
     langsPromises: LangTaskResult[],
@@ -75,7 +75,7 @@ export class TasksResolver {
 
       let asContents = (
         allPartitionsPromiseResult as OpenAI.Chat.Completions.ChatCompletion[]
-      ).map((p) => p.choices[0].message.content);
+      ).map((p) => p.choices[0].message.content ?? "");
 
       let newLangObject = {
         ...curr,

@@ -29,7 +29,7 @@ export class LangSyncDatabaseUpdate {
   update(
     databaseName: string,
     collectionName: string,
-    filter: Filter<Document>,
+    filter: Filter<Document | any>,
     update: UpdateFilter<Document>
   ) {
     return LangSyncDatabaseClient.client

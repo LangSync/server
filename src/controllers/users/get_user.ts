@@ -102,7 +102,7 @@ export default async function getUser(req: Request, res: Response) {
         user: userDocumment,
       });
     }
-  } catch (error) {
+  } catch (error: Error | any) {
     LangSyncLogger.instance.log({
       message: error,
       type: loggingTypes.error,

@@ -1,5 +1,4 @@
 import fs from "fs";
-import OpenAI from "openai";
 import * as utils from "../controllers/utils/utils";
 import uuid from "uuid";
 import { OpenAIClient } from "../ai_clients/openAI";
@@ -47,6 +46,7 @@ export class JsonAdapter implements BaseAdapter {
         throw new Error(
           "The provided content violates our policy, and so it is unacceptable to be processed."
         );
+      } else {
       }
     } else {
       LangSyncLogger.instance.log({

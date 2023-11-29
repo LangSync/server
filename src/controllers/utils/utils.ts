@@ -2,6 +2,7 @@ import { OpenAI } from "openai";
 import { getEncoding } from "js-tiktoken";
 import configs from "../../configs/openai";
 import { OpenAIClient } from "../../ai_clients/openAI";
+import verifyApiKeyWithUserAuthToken from "../auth/validate_api_key_with_user_token";
 const enc = getEncoding("gpt2");
 
 export function canBeDecodedToJsonSafely(encapsulatedFieldsString: string[]) {
@@ -9,7 +10,7 @@ export function canBeDecodedToJsonSafely(encapsulatedFieldsString: string[]) {
     let decoded = jsonFromEncapsulatedFields(encapsulatedFieldsString);
 
     return true;
-  } catch (error) {
+  } catch (error: Error | any) {
     LangSyncLogger.instance.log({
       message: error,
       type: loggingTypes.error,
@@ -135,4 +136,17 @@ export function sseEvent(event: SseEvent): string {
   };
 
   return JSON.stringify(obj) + "\n\n";
+}
+export async function extractAndVerifyApiKeyExistence(
+  authorizationHeader: string,
+  onSuccess: () => void,
+  onError: () => void
+): Promise<void> {
+  let apiKey = extractApiKeyFromAuthorizationHeader(authorizationHeader);
+
+  if (!apiKey) {
+    onError();
+  } else {
+    await verifyApiKeyWithUserAuthToken(apiKey, onSuccess);
+  }
 }

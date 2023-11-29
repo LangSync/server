@@ -5,14 +5,21 @@
     "target": "ES2021", // add this line to use ES2021
     "moduleResolution": "node",
     "sourceMap": true,
-    "strict": false,
+    "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": false,
-    "noImplicitThis": false,
-    "alwaysStrict": false,
-    "noUnusedLocals": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    // "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "strictFunctionTypes": true,
+    // "strictPropertyInitialization": true,
+    "removeComments": true,
+    "allowJs": false
   },
   "lib": ["es2015"],
   "exclude": ["node_modules"]

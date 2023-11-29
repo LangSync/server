@@ -2,10 +2,10 @@ import { OpenAI } from "openai";
 import configs from "../configs/openai";
 export class OpenAIClient implements ArtificialIntelligenceBase {
   constructor() {
-    this.init(configs.openAI);
+    this.init(<string>configs.openAI);
   }
 
-  client: OpenAI;
+  client!: OpenAI;
 
   init(apiKey: string): void {
     this.client = new OpenAI({
@@ -27,7 +27,7 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
       let flagged: boolean = modResult.results[0].flagged;
 
       return typeof flagged === "boolean" ? flagged : false;
-    } catch (error) {
+    } catch (error: Error | any) {
       if (error.status === 429) {
         LangSyncLogger.instance.log({
           message:
@@ -74,7 +74,7 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
       });
 
       return res;
-    } catch (error) {
+    } catch (error: Error | any) {
       if (error.status === 429) {
         LangSyncLogger.instance.log({
           message:

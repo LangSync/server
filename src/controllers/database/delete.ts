@@ -13,7 +13,7 @@ export class LangSyncDatabaseDelete {
   delete(
     databaseName: string,
     collectionName: string,
-    document: Filter<Document>
+    document: Filter<Document | any>
   ) {
     return LangSyncDatabaseClient.client
       .db(databaseName)

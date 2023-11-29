@@ -1,10 +1,7 @@
 import Joi from "joi";
-import * as express from "express";
-import { Application, Request, Response, NextFunction } from "express";
-import { extractApiKeyFromAuthorizationHeader, sseEvent } from "../utils/utils";
-import verifyApiKeyWithUserAuthToken from "../auth/validate_api_key_with_user_token";
+import { Request, Response } from "express";
+import { extractAndVerifyApiKeyExistence, sseEvent } from "../utils/utils";
 import { LangSyncDatabase } from "../database/database";
-import { LocalizationProcessor } from "./localization_launguage_processor";
 import { TasksResolver } from "./tasks_resolver";
 
 export default async function processTranslations(req: Request, res: Response) {
@@ -20,18 +17,9 @@ export default async function processTranslations(req: Request, res: Response) {
     "X-Accel-Buffering": "no",
   });
 
-  let apiKey = extractApiKeyFromAuthorizationHeader(req.headers.authorization);
-
-  if (!apiKey) {
-    return res.end(
-      sseEvent({
-        message: "No API key provided.",
-        type: "error",
-        statusCode: 401,
-      })
-    );
-  } else {
-    await verifyApiKeyWithUserAuthToken(apiKey, () => {
+  await extractAndVerifyApiKeyExistence(
+    req.headers.authorization ?? "",
+    () => {
       res.write(
         sseEvent({
           message: `Your API key is valid, continuing..\n`,
@@ -39,8 +27,17 @@ export default async function processTranslations(req: Request, res: Response) {
           statusCode: 200,
         })
       );
-    });
-  }
+    },
+    () => {
+      return res.end(
+        sseEvent({
+          message: "No API key provided.",
+          type: "error",
+          statusCode: 401,
+        })
+      );
+    }
+  );
 
   let schema = Joi.object({
     operationId: Joi.string().min(2).required(),
@@ -155,7 +152,7 @@ export default async function processTranslations(req: Request, res: Response) {
         statusCode: 200,
       })
     );
-  } catch (error) {
+  } catch (error: Error | any) {
     console.error(error);
     res.end(
       sseEvent({
