@@ -9,7 +9,10 @@ export default async function verifyApiKeyWithUserAuthToken(
   let document = await LangSyncDatabase.instance.read.userDocByApiKey(apiKey);
 
   if (!document) {
-    throw new Error("No user with this API key found.");
+    throw new ApiError({
+      message: "No user with this API key found.",
+      statusCode: 401,
+    });
   } else {
     new LangSyncLogger().log({ message: "User found with this API key." });
 

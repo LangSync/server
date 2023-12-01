@@ -57,7 +57,10 @@ export class GeneralUtils {
     );
 
     if (!exists) {
-      throw new Error("File type not supported.");
+      throw new ApiError({
+        message: "File type not supported.",
+        statusCode: 400,
+      });
     } else {
       new LangSyncLogger().log({
         message: `File type ${fileType} is supported.`,

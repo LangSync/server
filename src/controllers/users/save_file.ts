@@ -11,11 +11,11 @@ export default async function saveFile(req: Request, res: Response) {
 
   let filePath: string = GeneralUtils.getFilePath(req.file!.path);
 
-  GeneralUtils.validateFileTypeSupport(fileType);
-
   let adapter = new JsonAdapter(filePath);
 
   try {
+    adapter.validateFileTypeSupport(fileType);
+
     let apiKey: ExtractedApiKey =
       GeneralUtils.extractApiKeyFromAuthorizationHeader(
         req.headers.authorization ?? ""

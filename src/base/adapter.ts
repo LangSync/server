@@ -6,4 +6,6 @@ interface BaseAdapter {
   isHarming(options: HarmOptions): Promise<boolean>;
   asPartsForOpenAI(): Promise<string[]>;
   generateUniqueId(): string;
+  validateFileTypeSupport(fileType: string): void;
+  ensureParsedIsValidObject(parsed: any): void;
 }
