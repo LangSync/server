@@ -1,7 +1,3 @@
-import { OpenAI } from "openai";
-import configs from "../../configs/openai";
-import { OpenAIClient } from "../../ai_clients/openAI";
-import verifyApiKeyWithUserAuthToken from "../auth/validate_api_key_with_user_token";
 import { LangSyncLogger } from "./logger";
 import { LangSyncAllowedFileTypes, loggingTypes } from "../../enum";
 
