@@ -48,6 +48,7 @@ export default async function processTranslations(req: Request, res: Response) {
     langs: Joi.array().items(Joi.string().min(2)).required(),
     includeOutput: Joi.boolean().required(),
     languageLocalizationMaxDelay: Joi.number().max(1000).required(),
+    instruction: Joi.string().min(2).optional(),
   });
 
   let { error, value } = schema.validate(req.body);
@@ -72,7 +73,13 @@ export default async function processTranslations(req: Request, res: Response) {
   }
 
   try {
-    const { operationId, langs, includeOutput } = value;
+    const {
+      operationId,
+      langs,
+      includeOutput,
+      languageLocalizationMaxDelay,
+      instruction,
+    } = value;
 
     res.write(
       sseEvent({
@@ -106,12 +113,13 @@ export default async function processTranslations(req: Request, res: Response) {
     let partitions = saveFileOperationDoc.jsonAsParts;
 
     let resultTranslations: any[] =
-      await TasksResolver.handlePartitionsTranslations(
-        partitions,
-        langs,
-        value.languageLocalizationMaxDelay,
-        res
-      );
+      await TasksResolver.handlePartitionsTranslations({
+        partitions: partitions,
+        langs: langs,
+        languageLocalizationMaxDelay: languageLocalizationMaxDelay,
+        expressResponse: res,
+        instruction: instruction,
+      });
 
     res.write(
       sseEvent({

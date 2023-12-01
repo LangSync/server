@@ -4,9 +4,11 @@ function minuteToSeconds(minutes: number): number {
 let modelMaximumTokens: number = 1300;
 
 export default {
-  jsonUserMessage: (partition: any, lang: string): string => {
-    let message: string = `Translate this to ${lang}: ${partition}`;
-    return message;
+  jsonUserMessage: (options: PromptOptions): string => {
+    let translateMessage: string = `Translate this to ${options.lang}: ${options.partition}`;
+    let instruction: string = options.instruction || "";
+
+    return `${instruction}\n${translateMessage}`;
   },
   langsSupportInstruction: `from the given list, filter only strings that relates to some ISO 639-1 language code and return them comma separated without changing their original format.`,
   jsonOpenAIModel: "gpt-3.5-turbo",

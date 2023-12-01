@@ -6,10 +6,11 @@ export class LocalizationProcessor {
   constructor(private options: LocalizationProcessorOptions) {}
 
   taskPromise(options: LangTaskOptions): LangTaskResult {
-    let openAIMessages: string[] = this.requestMessagesForOpenAI(
-      options.partitions,
-      options.currentLang
-    );
+    let openAIMessages: string[] = this.requestMessagesForOpenAI({
+      partitions: options.partitions,
+      lang: options.currentLang,
+      instruction: options.instruction,
+    });
 
     let promises = this.openAIRequestsFrom(openAIMessages);
 
@@ -34,14 +35,18 @@ export class LocalizationProcessor {
     });
   }
 
-  requestMessagesForOpenAI(partitions: any[], lang: string): string[] {
+  requestMessagesForOpenAI(options: PartitionsMessagesOptions): string[] {
     let result: string[] = [];
 
-    for (let index = 0; index < partitions.length; index++) {
-      const currentPartition = partitions[index];
+    for (let index = 0; index < options.partitions.length; index++) {
+      const currentPartition = options.partitions[index];
 
       let messageToOpenAI: string =
-        new OpenAIClient().partitionLocalizationPrompt(currentPartition, lang);
+        new OpenAIClient().partitionLocalizationPrompt({
+          partition: currentPartition,
+          lang: options.lang,
+          instruction: options.instruction,
+        });
 
       result.push(messageToOpenAI);
     }

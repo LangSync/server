@@ -30,11 +30,31 @@ type LocalizationProcessorOptions = {
 type LangTaskOptions = {
   partitions: any[];
   currentLang: string;
+  instruction?: string;
 };
 
 type LangTaskResult = {
   lang: string;
   localizedAt: string;
-
   allPartitionsPromise: () => Promise<any[]>;
+};
+
+type TranslationOptions = {
+  partitions: any[];
+  langs: string[];
+  languageLocalizationMaxDelay: number;
+  expressResponse: any;
+  instruction?: string;
+};
+
+type PartitionsMessagesOptions = {
+  partitions: any[];
+  lang: string;
+  instruction?: string;
+};
+
+type PromptOptions = {
+  partition: any;
+  lang: string;
+  instruction?: string;
 };

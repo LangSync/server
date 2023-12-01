@@ -101,8 +101,8 @@ export class OpenAIClient implements ArtificialIntelligenceBase {
     }
   }
 
-  partitionLocalizationPrompt(partition: any, lang: string): string {
-    return configs.jsonUserMessage(partition, lang);
+  partitionLocalizationPrompt(options: PromptOptions): string {
+    return configs.jsonUserMessage(options);
   }
 
   async makeOpenAIRequest(

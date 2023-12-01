@@ -110,17 +110,12 @@ export class TasksResolver {
     return result;
   }
 
-  static async handlePartitionsTranslations(
-    partitions: any[],
-    langs: string[],
-    languageLocalizationMaxDelay: number,
-    res: Response
-  ) {
-    res.write(
+  static async handlePartitionsTranslations(options: TranslationOptions) {
+    options.expressResponse.write(
       sseEvent({
         message: `Starting to localize ${
-          partitions.length
-        } partitions found from your input file to target languages: ${langs.join(
+          options.partitions.length
+        } partitions found from your input file to target languages: ${options.langs.join(
           ", "
         )}\n`,
         type: "info",
@@ -130,20 +125,23 @@ export class TasksResolver {
 
     let resultTranslationsBeforePromiseResolve: LangTaskResult[] = [];
 
-    langs.forEach((currentLang) => {
-      let indexLang = langs.indexOf(currentLang);
+    options.langs.forEach((currentLang) => {
+      let indexLang = options.langs.indexOf(currentLang);
 
       let processor = new LocalizationProcessor({
         index: indexLang,
         lang: currentLang,
-        partitions: partitions,
+        partitions: options.partitions,
       });
 
-      res.write(processor.scheduleStartSseEventOnAll(langs.length));
+      options.expressResponse.write(
+        processor.scheduleStartSseEventOnAll(options.langs.length)
+      );
 
       let task: LangTaskResult = processor.taskPromise({
-        partitions,
-        currentLang,
+        partitions: options.partitions,
+        currentLang: currentLang,
+        instruction: options.instruction,
       });
 
       resultTranslationsBeforePromiseResolve.push(task);
@@ -152,8 +150,8 @@ export class TasksResolver {
     let resultTranslationsAfterPromiseResolve =
       await TasksResolver.resolveAllLangsLangsPromises(
         resultTranslationsBeforePromiseResolve,
-        languageLocalizationMaxDelay,
-        res
+        options.languageLocalizationMaxDelay,
+        options.expressResponse
       );
 
     return resultTranslationsAfterPromiseResolve;
