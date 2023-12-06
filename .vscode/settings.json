@@ -1,5 +1,5 @@
 {
-  "workbench.colorTheme": "Ayu Dark Bordered",
+  // "workbench.colorTheme": "Ayu Dark Bordered",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.tsserver.experimental.enableProjectDiagnostics": true,
   "[nginx]": {

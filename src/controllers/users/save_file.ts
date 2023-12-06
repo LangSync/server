@@ -23,7 +23,8 @@ export default async function saveFile(req: Request, res: Response) {
 
     await verifyApiKeyWithUserAuthToken(apiKey);
 
-    let fileAsParts = await adapter.asPartsForOpenAI();
+    let parsedAsObject = adapter.parseString();
+    let fileAsParts = await adapter.asPartsForAIClient(parsedAsObject);
 
     let userDoc = await LangSyncDatabase.instance.read.userDocByApiKey(apiKey);
 
