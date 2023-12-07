@@ -1,9 +1,25 @@
 import { LangSyncLogger } from "./logger";
 import { LangSyncAllowedFileTypes, loggingTypes } from "../../enum";
-import { ExtractedApiKey } from "../../type";
+import { AdapterFromOptions, ExtractedApiKey, ValidAdapter } from "../../type";
 import { ApiError } from "./api_error";
+import { JsonAdapter } from "../../adapters/json";
+import { YamlAdapter } from "../../adapters/yaml";
 
 export class GeneralUtils {
+  static from(options: AdapterFromOptions): ValidAdapter {
+    switch (options.fileType) {
+      case "json":
+        return new JsonAdapter(options.filePath);
+      case "yaml":
+        return new YamlAdapter(options.filePath);
+      default:
+        throw new ApiError({
+          message: "Unsupported file type",
+          statusCode: 400,
+        });
+    }
+  }
+
   static canBeDecodedToJsonSafely(contents: string[]): boolean {
     try {
       this.jsonFromEncapsulatedFields(contents);

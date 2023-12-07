@@ -4,7 +4,6 @@ import { LangSyncDatabase } from "../database/database";
 import { LangSyncLogger } from "../utils/logger";
 import { loggingTypes } from "../../enum";
 import { GeneralUtils } from "../utils/general";
-import CoreAdapter from "../../base/abstracts/core_adapter";
 import { ExtractedApiKey, ValidAdapter } from "../../type";
 
 export default async function saveFile(req: Request, res: Response) {
@@ -12,7 +11,7 @@ export default async function saveFile(req: Request, res: Response) {
 
   let filePath: string = GeneralUtils.getFilePath(req.file!.path);
 
-  let adapter: ValidAdapter = CoreAdapter.from({
+  let adapter: ValidAdapter = GeneralUtils.from({
     fileType: fileType,
     filePath: filePath,
   });

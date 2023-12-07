@@ -1,5 +1,5 @@
 import { BaseAdapterInterface } from "../base/interfaces/adapter";
-import CoreAdapter from "../base/abstracts/core_adapter";
+import { CoreAdapter } from "../base/abstracts/core_adapter";
 
 export class JsonAdapter extends CoreAdapter implements BaseAdapterInterface {
   constructor(filePath: string) {

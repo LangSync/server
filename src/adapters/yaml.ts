@@ -1,6 +1,6 @@
-import CoreAdapter from "../base/abstracts/core_adapter";
-import { BaseAdapterInterface } from "../base/interfaces/adapter";
 import Yaml from "yaml";
+import { BaseAdapterInterface } from "../base/interfaces/adapter";
+import { CoreAdapter } from "../base/abstracts/core_adapter";
 
 export class YamlAdapter extends CoreAdapter implements BaseAdapterInterface {
   constructor(filePath: string) {

@@ -1,17 +1,24 @@
+import fs from "fs";
 import { v4 } from "uuid";
 import { OpenAIClient } from "../../ai_clients/openAI";
 import { LangSyncLogger } from "../../controllers/utils/logger";
 import { loggingTypes } from "../../enum";
-import fs from "fs";
 import { GeneralUtils } from "../../controllers/utils/general";
-import { CoreAdapterInterface } from "../interfaces/adapter";
 import { parsedFileContentPartsSeparatorForOpenAI } from "../../controllers/utils/partitions_splitter";
-import { JsonAdapter } from "../../adapters/json";
-import { YamlAdapter } from "../../adapters/yaml";
-import { AdapterFromOptions, ValidAdapter } from "../../type";
+import { HarmOptions } from "../../type";
 import { ApiError } from "../../controllers/utils/api_error";
 
-export default class CoreAdapter implements CoreAdapterInterface {
+interface CoreAdapterInterface {
+  get aiClient(): OpenAIClient;
+  isHarming(options: HarmOptions): Promise<boolean>;
+  deleteFile(): void;
+  readFileAsString(): string;
+  generateUniqueId(): string;
+  validateFileTypeSupport(fileType: string): void;
+  ensureParsedIsValidObject(parsed: any): void;
+}
+
+export class CoreAdapter implements CoreAdapterInterface {
   filePath: string;
 
   numberOfGeneratedUniqueIds: number = 0;
@@ -164,20 +171,6 @@ export default class CoreAdapter implements CoreAdapterInterface {
           statusCode: 400,
         });
       }
-    }
-  }
-
-  static from(options: AdapterFromOptions): ValidAdapter {
-    switch (options.fileType) {
-      case "json":
-        return new JsonAdapter(options.filePath);
-      case "yaml":
-        return new YamlAdapter(options.filePath);
-      default:
-        throw new ApiError({
-          message: "Unsupported file type",
-          statusCode: 400,
-        });
     }
   }
 }
