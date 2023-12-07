@@ -1,5 +1,5 @@
 import { JsonAdapter } from "./adapters/json";
-import { type YamlAdapter } from "./adapters/yaml";
+import YamlAdapter from "./adapters/yaml";
 
 export type ExtractedApiKey = string;
 
@@ -48,6 +48,7 @@ export type TranslationOptions = {
   languageLocalizationMaxDelay: number;
   expressResponse: any;
   instruction?: string;
+  adapterFileExtension: string;
 };
 
 export type PartitionsMessagesOptions = {
@@ -63,8 +64,7 @@ export type PromptOptions = {
 };
 
 export type AdapterFromOptions = {
-  fileType: string;
-  filePath: string;
+  adapterFileExtension: string;
 };
 
 export type ValidAdapter = JsonAdapter | YamlAdapter;

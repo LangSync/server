@@ -11,8 +11,8 @@ import { ApiError } from "../../controllers/utils/api_error";
 interface CoreAdapterInterface {
   get aiClient(): OpenAIClient;
   isHarming(options: HarmOptions): Promise<boolean>;
-  deleteFile(): void;
-  readFileAsString(): string;
+  deleteFile(filePath: string): void;
+  readFileAsString(filePath: string): string;
   generateUniqueId(): string;
   validateFileTypeSupport(fileType: string): void;
   ensureParsedIsValidObject(parsed: any): void;
@@ -23,10 +23,6 @@ export class CoreAdapter implements CoreAdapterInterface {
 
   numberOfGeneratedUniqueIds: number = 0;
   allowMultipleUniqueIds: boolean = false;
-
-  constructor(filePath: string) {
-    this.filePath = filePath;
-  }
 
   get aiClient(): OpenAIClient {
     return new OpenAIClient();
@@ -59,16 +55,16 @@ export class CoreAdapter implements CoreAdapterInterface {
     }
   }
 
-  deleteFile(): void {
-    if (fs.existsSync(this.filePath)) {
-      fs.unlinkSync(this.filePath);
+  deleteFile(filePath: string): void {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
   }
 
-  readFileAsString(): string {
-    let asString: string = fs.readFileSync(this.filePath, "utf8");
+  readFileAsString(filePath: string): string {
+    let asString: string = fs.readFileSync(filePath, "utf8");
     new LangSyncLogger().log({
-      message: `File named ${this.filePath
+      message: `File named ${filePath
         .split("/")
         .pop()} has been loaded as a string.`,
       type: loggingTypes.info,
@@ -101,9 +97,10 @@ export class CoreAdapter implements CoreAdapterInterface {
 
   async asPartsForAIClient(
     // @ts-ignore
-    parsed: any
+    parsed: any,
+    filePath: string
   ): Promise<string[]> {
-    let asString: string = this.readFileAsString();
+    let asString: string = this.readFileAsString(filePath);
 
     // @ts-ignore
     let isHarming: boolean = await this.isHarming({
@@ -116,9 +113,9 @@ export class CoreAdapter implements CoreAdapterInterface {
     );
 
     new LangSyncLogger().log({
-      message: `File named ${this.filePath
-        .split("/")
-        .pop()} has been split into ${asParts.length} parts.`,
+      message: `File named ${filePath.split("/").pop()} has been split into ${
+        asParts.length
+      } parts.`,
       type: loggingTypes.info,
     });
 

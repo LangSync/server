@@ -5,6 +5,10 @@ function minuteToSeconds(minutes: number): number {
 }
 let modelMaximumTokens: number = 1300;
 
+if (process.env.DEBUG) {
+  console.log("DEBUG MODE");
+}
+
 export default {
   jsonUserMessage: (options: PromptOptions): string => {
     let translateMessage: string = `Translate this to ${options.lang}: ${options.partition}`;
@@ -23,6 +27,8 @@ export default {
   },
   jsonSystemMessage:
     "You're a professional software localizer for key-value pairs, all pairs are separated with brackets (), I will prompt you with a localization instruction and the pairs, you will localize and return the localized pairs in the same format & syntax only, don't include the instruction in the response, only the localized pairs.",
-  openAI: process.env.OPENAI_API_KEY,
+  openAI: process.env.DEBUG
+    ? process.env.OPENAI_API_KEY_DEBUG
+    : process.env.OPENAI_API_KEY_PROD,
   delayForRateLimitNextRequestInSeconds: minuteToSeconds(1) / 3,
 };

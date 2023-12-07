@@ -11,6 +11,7 @@ export class LangSyncDatabaseInsert {
     operationId: string;
     createdAt: string;
     jsonAsParts: string[];
+    adapterFileExtension: string;
   }): Promise<any> {
     return await this.insert("db", "jsonPartitions", doc);
   }

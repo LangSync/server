@@ -39,7 +39,8 @@ export class LangSyncDatabaseRead {
             // show only the "lang" field of the item.
             lang: "$$output.lang",
             localizedAt: "$$output.localizedAt",
-            jsonDecodedResponse: "$$output.jsonDecodedResponse",
+            objectDecodedResponse: "$$output.objectDecodedResponse",
+            adaptedResponse: "$$output.adaptedResponse",
           },
         },
       },

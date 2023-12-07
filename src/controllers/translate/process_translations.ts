@@ -110,6 +110,7 @@ export default async function processTranslations(req: Request, res: Response) {
     }
 
     let partitions = saveFileOperationDoc.jsonAsParts;
+    let adapterFileExtension = saveFileOperationDoc.adapterFileExtension;
 
     let resultTranslations: any[] =
       await TasksResolver.handlePartitionsTranslations({
@@ -118,6 +119,7 @@ export default async function processTranslations(req: Request, res: Response) {
         languageLocalizationMaxDelay: languageLocalizationMaxDelay,
         expressResponse: res,
         instruction: instruction,
+        adapterFileExtension: adapterFileExtension,
       });
 
     res.write(

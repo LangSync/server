@@ -7,13 +7,16 @@ import { GeneralUtils } from "../utils/general";
 import { ExtractedApiKey, ValidAdapter } from "../../type";
 
 export default async function saveFile(req: Request, res: Response) {
-  let fileType = req.params.fileType;
+  let fileExtension = req.params.fileType;
+
+  // GeneralUtils.getFileExtension(req.file!.path);
+
+  req.params.fileType;
 
   let filePath: string = GeneralUtils.getFilePath(req.file!.path);
 
   let adapter: ValidAdapter = GeneralUtils.from({
-    fileType: fileType,
-    filePath: filePath,
+    adapterFileExtension: fileExtension,
   });
 
   try {
@@ -24,9 +27,12 @@ export default async function saveFile(req: Request, res: Response) {
 
     await verifyApiKeyWithUserAuthToken(apiKey);
 
-    let parsedAsObject = adapter.parseStringToObject();
+    let parsedAsObject = adapter.parseStringToObject(filePath);
 
-    let fileAsParts = await adapter.asPartsForAIClient(parsedAsObject);
+    let fileAsParts = await adapter.asPartsForAIClient(
+      parsedAsObject,
+      filePath
+    );
 
     let userDoc = await LangSyncDatabase.instance.read.userDocByApiKey(apiKey);
 
@@ -37,9 +43,10 @@ export default async function saveFile(req: Request, res: Response) {
       operationId: operationId,
       createdAt: new Date().toISOString(),
       jsonAsParts: fileAsParts,
+      adapterFileExtension: adapter.adapterFileExtension,
     });
 
-    adapter.deleteFile();
+    adapter.deleteFile(filePath);
 
     res.status(200).json({
       message: "Successfully saved partitioned json",
@@ -51,7 +58,7 @@ export default async function saveFile(req: Request, res: Response) {
       type: loggingTypes.error,
     });
 
-    adapter.deleteFile();
+    adapter.deleteFile(filePath);
 
     res.status(500).json({ message: "Internal server error", error: error });
   }

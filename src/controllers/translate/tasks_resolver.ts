@@ -3,7 +3,7 @@ import { LocalizationProcessor } from "./localization_launguage_processor";
 import OpenAI from "openai";
 import { sseEvent } from "../utils/sse";
 import { GeneralUtils } from "../utils/general";
-import { LangTaskResult, TranslationOptions } from "../../type";
+import { LangTaskResult, TranslationOptions, ValidAdapter } from "../../type";
 
 export class TasksResolver {
   static async timeoutPromise(
@@ -19,7 +19,8 @@ export class TasksResolver {
   static async resolveAllLangsLangsPromises(
     langsPromises: LangTaskResult[],
     languageLocalizationMaxDelay: number,
-    res: Response
+    res: Response,
+    adapterFileExtension: string
   ) {
     let result = [];
 
@@ -78,15 +79,22 @@ export class TasksResolver {
         allPartitionsPromiseResult as OpenAI.Chat.Completions.ChatCompletion[]
       ).map((p) => p.choices[0].message.content ?? "");
 
+      let objectResponse = GeneralUtils.canBeDecodedAsObject(asContents)
+        ? GeneralUtils.ObjectFromEncapsulatedFields(asContents)
+        : {
+            langsyncError:
+              "the output of this partition can't be decoded to a valid JSON object",
+          };
+
+      let adapter: ValidAdapter = GeneralUtils.from({
+        adapterFileExtension: adapterFileExtension,
+      });
+
       let newLangObject = {
         ...curr,
         rawRResultResponse: asContents,
-        jsonDecodedResponse: GeneralUtils.canBeDecodedToJsonSafely(asContents)
-          ? GeneralUtils.jsonFromEncapsulatedFields(asContents)
-          : {
-              langsyncError:
-                "the output of this partition can't be decoded to JSON",
-            },
+        objectDecodedResponse: objectResponse,
+        adaptedResponse: adapter.stringifyObjectToString(objectResponse),
       };
 
       delete newLangObject.allPartitionsPromise;
@@ -152,7 +160,8 @@ export class TasksResolver {
       await TasksResolver.resolveAllLangsLangsPromises(
         resultTranslationsBeforePromiseResolve,
         options.languageLocalizationMaxDelay,
-        options.expressResponse
+        options.expressResponse,
+        options.adapterFileExtension
       );
 
     return resultTranslationsAfterPromiseResolve;
