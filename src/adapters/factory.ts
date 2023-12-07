@@ -1,13 +1,18 @@
 import { ApiError } from "../controllers/utils/api_error";
 import { LangSyncLogger } from "../controllers/utils/logger";
+import { LangSyncAllowedFileTypes } from "../enum";
 import { AdapterFromOptions, ValidAdapter } from "../type";
 import { JsonAdapter } from "./json";
 import YamlAdapter from "./yaml";
 
 export class AdapterFactory {
-  static _instance = new AdapterFactory();
+  private static _instance = new AdapterFactory();
 
-  static get instance() {
+  private constructor() {
+    this.ensureAdapters();
+  }
+
+  public static get instance() {
     return this._instance;
   }
 
@@ -35,4 +40,14 @@ export class AdapterFactory {
     acc[adapter.adapterFileExtension] = adapter;
     return acc;
   }, {} as Record<string, ValidAdapter>);
+
+  ensureAdapters(): void {
+    let allowedFileTypeEnumEntries = Object.entries(LangSyncAllowedFileTypes);
+
+    if (this.adapters.length != allowedFileTypeEnumEntries.length) {
+      throw new Error(
+        "Adapter Factory not properly initialized. Please check the allowed file types enum and the adapters array in the factory."
+      );
+    }
+  }
 }
