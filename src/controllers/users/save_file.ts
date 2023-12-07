@@ -5,6 +5,7 @@ import { LangSyncLogger } from "../utils/logger";
 import { loggingTypes } from "../../enum";
 import { GeneralUtils } from "../utils/general";
 import { ExtractedApiKey, ValidAdapter } from "../../type";
+import { AdapterFactory } from "../../adapters/factory";
 
 export default async function saveFile(req: Request, res: Response) {
   let fileExtension = req.params.fileType;
@@ -15,7 +16,7 @@ export default async function saveFile(req: Request, res: Response) {
 
   let filePath: string = GeneralUtils.getFilePath(req.file!.path);
 
-  let adapter: ValidAdapter = GeneralUtils.from({
+  let adapter: ValidAdapter = AdapterFactory.instance.from({
     adapterFileExtension: fileExtension,
   });
 

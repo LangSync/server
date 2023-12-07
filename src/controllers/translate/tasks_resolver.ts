@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import { sseEvent } from "../utils/sse";
 import { GeneralUtils } from "../utils/general";
 import { LangTaskResult, TranslationOptions, ValidAdapter } from "../../type";
+import { AdapterFactory } from "../../adapters/factory";
 
 export class TasksResolver {
   static async timeoutPromise(
@@ -86,7 +87,7 @@ export class TasksResolver {
               "the output of this partition can't be decoded to a valid JSON object",
           };
 
-      let adapter: ValidAdapter = GeneralUtils.from({
+      let adapter: ValidAdapter = AdapterFactory.instance.from({
         adapterFileExtension: adapterFileExtension,
       });
 
