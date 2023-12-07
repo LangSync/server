@@ -1,6 +1,12 @@
 import OpenAI from "openai";
 import { sseEvent } from "../utils/sse";
 import { OpenAIClient } from "../../ai_clients/openAI";
+import {
+  LangTaskOptions,
+  LangTaskResult,
+  LocalizationProcessorOptions,
+  PartitionsMessagesOptions,
+} from "../../type";
 
 export class LocalizationProcessor {
   constructor(private options: LocalizationProcessorOptions) {}

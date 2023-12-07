@@ -2,6 +2,7 @@ import { OpenAI } from "openai";
 import configs from "../configs/openai";
 import { LangSyncLogger } from "../controllers/utils/logger";
 import { loggingTypes } from "../enum";
+import { PromptOptions } from "../type";
 
 export class OpenAIClient implements ArtificialIntelligenceBase {
   constructor() {

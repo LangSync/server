@@ -1,3 +1,5 @@
+import { SseEvent, SseResponseEvent } from "../../type";
+
 export function sseEvent(event: SseEvent): string {
   let types: string[] = ["warn", "info", "error", "result"];
 

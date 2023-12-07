@@ -1,8 +1,8 @@
 import { type OpenAIClient } from "../../ai_clients/openAI";
+import { type HarmOptions } from "../../type";
 
 export interface BaseAdapterInterface {
-  parseString(fileContent: string): void;
-  ensureParsedIsValidObject(parsed: any): void;
+  parseStringToObject(fileContent: string): void;
 }
 
 export interface CoreAdapterInterface {
@@ -12,4 +12,5 @@ export interface CoreAdapterInterface {
   readFileAsString(): string;
   generateUniqueId(): string;
   validateFileTypeSupport(fileType: string): void;
+  ensureParsedIsValidObject(parsed: any): void;
 }

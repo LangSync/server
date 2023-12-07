@@ -1,4 +1,5 @@
 import { loggingTypes } from "../../enum";
+import { LogOptions } from "../../type";
 
 interface LoggerBase {
   log(options: LogOptions): void;

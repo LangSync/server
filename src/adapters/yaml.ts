@@ -1,16 +1,18 @@
-import { CoreAdapter } from "../base/abstracts/core_adapter";
+import CoreAdapter from "../base/abstracts/core_adapter";
 import { BaseAdapterInterface } from "../base/interfaces/adapter";
+import Yaml from "yaml";
 
 export class YamlAdapter extends CoreAdapter implements BaseAdapterInterface {
   constructor(filePath: string) {
     super(filePath);
   }
 
-  parseString(fileContent: string): void {
-    throw new Error("Method not implemented.");
-  }
+  parseStringToObject(): void {
+    let fileContent = this.readFileAsString();
 
-  ensureParsedIsValidObject(parsed: any): void {
-    throw new Error("Method not implemented.");
+    let parsed = Yaml.parse(fileContent);
+    this.ensureParsedIsValidObject(parsed);
+
+    return parsed;
   }
 }

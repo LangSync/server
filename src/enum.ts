@@ -8,4 +8,5 @@ export enum loggingTypes {
 
 export enum LangSyncAllowedFileTypes {
   json,
+  yaml,
 }

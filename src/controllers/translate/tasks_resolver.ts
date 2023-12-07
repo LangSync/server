@@ -3,6 +3,7 @@ import { LocalizationProcessor } from "./localization_launguage_processor";
 import OpenAI from "openai";
 import { sseEvent } from "../utils/sse";
 import { GeneralUtils } from "../utils/general";
+import { LangTaskResult, TranslationOptions } from "../../type";
 
 export class TasksResolver {
   static async timeoutPromise(

@@ -1,45 +1,48 @@
-type ExtractedApiKey = string;
+import { JsonAdapter } from "./adapters/json";
+import { type YamlAdapter } from "./adapters/yaml";
 
-type HarmOptions = { fileContent: string; throwIfHarming: boolean };
+export type ExtractedApiKey = string;
 
-type LogOptions = {
+export type HarmOptions = { fileContent: string; throwIfHarming: boolean };
+
+export type LogOptions = {
   message: string;
   type?: any;
   data?: any;
 };
 
-type SseEvent = {
+export type SseEvent = {
   message: string;
   type: string;
   statusCode: number;
 };
 
-type SseResponseEvent = {
+export type SseResponseEvent = {
   message: string;
   type: string;
   statusCode: number;
   date: string;
 };
 
-type LocalizationProcessorOptions = {
+export type LocalizationProcessorOptions = {
   index: number;
   lang: string;
   partitions: any[];
 };
 
-type LangTaskOptions = {
+export type LangTaskOptions = {
   partitions: any[];
   currentLang: string;
   instruction?: string;
 };
 
-type LangTaskResult = {
+export type LangTaskResult = {
   lang: string;
   localizedAt: string;
   allPartitionsPromise: () => Promise<any[]>;
 };
 
-type TranslationOptions = {
+export type TranslationOptions = {
   partitions: any[];
   langs: string[];
   languageLocalizationMaxDelay: number;
@@ -47,14 +50,21 @@ type TranslationOptions = {
   instruction?: string;
 };
 
-type PartitionsMessagesOptions = {
+export type PartitionsMessagesOptions = {
   partitions: any[];
   lang: string;
   instruction?: string;
 };
 
-type PromptOptions = {
+export type PromptOptions = {
   partition: any;
   lang: string;
   instruction?: string;
 };
+
+export type AdapterFromOptions = {
+  fileType: string;
+  filePath: string;
+};
+
+export type ValidAdapter = JsonAdapter | YamlAdapter;

@@ -1,5 +1,7 @@
 import { LangSyncLogger } from "./logger";
 import { LangSyncAllowedFileTypes, loggingTypes } from "../../enum";
+import { ExtractedApiKey } from "../../type";
+import { ApiError } from "./api_error";
 
 export class GeneralUtils {
   static canBeDecodedToJsonSafely(contents: string[]): boolean {

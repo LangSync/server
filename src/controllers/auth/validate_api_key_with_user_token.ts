@@ -1,6 +1,8 @@
 import { LangSyncDatabase } from "../database/database";
 import { LangSyncLogger } from "../utils/logger";
 import { GeneralUtils } from "../utils/general";
+import { ExtractedApiKey } from "../../type";
+import { ApiError } from "../utils/api_error";
 
 export default async function verifyApiKeyWithUserAuthToken(
   apiKey: ExtractedApiKey,

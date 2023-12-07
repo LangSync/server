@@ -1,3 +1,5 @@
+import { PromptOptions } from "../type";
+
 function minuteToSeconds(minutes: number): number {
   return minutes * 60;
 }

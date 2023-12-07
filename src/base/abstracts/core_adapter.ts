@@ -6,8 +6,12 @@ import fs from "fs";
 import { GeneralUtils } from "../../controllers/utils/general";
 import { CoreAdapterInterface } from "../interfaces/adapter";
 import { parsedFileContentPartsSeparatorForOpenAI } from "../../controllers/utils/partitions_splitter";
+import { JsonAdapter } from "../../adapters/json";
+import { YamlAdapter } from "../../adapters/yaml";
+import { AdapterFromOptions, ValidAdapter } from "../../type";
+import { ApiError } from "../../controllers/utils/api_error";
 
-export abstract class CoreAdapter implements CoreAdapterInterface {
+export default class CoreAdapter implements CoreAdapterInterface {
   filePath: string;
 
   numberOfGeneratedUniqueIds: number = 0;
@@ -112,5 +116,68 @@ export abstract class CoreAdapter implements CoreAdapterInterface {
     });
 
     return asParts;
+  }
+
+  ensureParsedIsValidObject(
+    // ensure that the parsed json id object of string-string pairs.
+    parsed: any
+  ): void {
+    if (typeof parsed !== "object") {
+      throw new ApiError({
+        message: "The parsed json is not an object.",
+        statusCode: 400,
+      });
+    }
+
+    if (Array.isArray(parsed)) {
+      throw new ApiError({
+        message: "The parsed json is an array.",
+        statusCode: 400,
+      });
+    }
+
+    if (parsed === null) {
+      throw new ApiError({
+        message: "The parsed json is null.",
+        statusCode: 400,
+      });
+    }
+
+    if (Object.keys(parsed).length === 0) {
+      throw new ApiError({
+        message: "The parsed json is an empty object.",
+        statusCode: 400,
+      });
+    }
+
+    for (let key in parsed) {
+      if (typeof key !== "string") {
+        throw new ApiError({
+          message: "The parsed json has a non-string key.",
+          statusCode: 400,
+        });
+      }
+
+      if (typeof parsed[key] !== "string") {
+        throw new ApiError({
+          message: "The parsed json has a non-string value.",
+          statusCode: 400,
+        });
+      }
+    }
+  }
+
+  static from(options: AdapterFromOptions): ValidAdapter {
+    switch (options.fileType) {
+      case "json":
+        return new JsonAdapter(options.filePath);
+      case "yaml":
+        return new YamlAdapter(options.filePath);
+      default:
+        throw new ApiError({
+          message: "Unsupported file type",
+          statusCode: 400,
+        });
+    }
   }
 }
