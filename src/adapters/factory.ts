@@ -44,7 +44,7 @@ export class AdapterFactory {
   ensureAdapters(): void {
     let allowedFileTypeEnumEntries = Object.entries(LangSyncAllowedFileTypes);
 
-    if (this.adapters.length != allowedFileTypeEnumEntries.length) {
+    if (this.adapters.length != allowedFileTypeEnumEntries.length / 2) {
       throw new Error(
         "Adapter Factory not properly initialized. Please check the allowed file types enum and the adapters array in the factory."
       );

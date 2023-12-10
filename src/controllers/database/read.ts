@@ -2,6 +2,42 @@ import { Document, Filter } from "mongodb";
 import { LangSyncDatabaseClient } from "./client";
 
 export class LangSyncDatabaseRead {
+  async userDocByEmail(email: any) {
+    let userDocFilter = {
+      email: email,
+    };
+
+    let projection = {
+      _id: 0,
+      email: 1,
+      username: 1,
+      userId: 1,
+      createdAt: 1,
+      apiKeys: {
+        $map: {
+          input: "$apiKeys",
+          as: "apiKey",
+          in: {
+            apiKey: "$$apiKey.apiKey",
+          },
+        },
+      },
+    };
+
+    let aggregateQuery = [
+      {
+        $match: userDocFilter,
+      },
+      {
+        $project: projection,
+      },
+    ];
+
+    let docs = await this.readMany("db", "users", aggregateQuery);
+
+    return docs[0] || null;
+  }
+
   async userDocByApiKey(apiKey: string): Promise<any> {
     let userDocFilter = {
       apiKeys: {

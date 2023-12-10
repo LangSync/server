@@ -1,6 +1,16 @@
 import { LangSyncDatabaseClient } from "./client";
 
 export class LangSyncDatabaseInsert {
+  async newUserDoc(doc: {
+    username: any;
+    email: any;
+    userId: string;
+    createdAt: string;
+    apiKeys: { $currentDate: { createdAt: boolean }; apiKey: string }[];
+  }) {
+    return await this.insert("db", "users", doc);
+  }
+
   async cliException(value: any) {
     return await this.insert("db", "cli_exceptions", value);
   }
