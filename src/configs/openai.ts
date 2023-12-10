@@ -5,7 +5,7 @@ function minuteToSeconds(minutes: number): number {
 }
 let modelMaximumTokens: number = 1300;
 
-if (process.env.DEBUG) {
+if (process.env.DEBUG.toLowerCase() === "true") {
   console.log("DEBUG MODE");
 }
 
