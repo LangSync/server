@@ -1,7 +1,7 @@
 node_modules
 parts.txt
 sample.json
-.env
+
 dist/
 *.conf
 test/
