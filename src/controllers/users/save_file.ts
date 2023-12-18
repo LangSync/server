@@ -12,8 +12,6 @@ export default async function saveFile(req: Request, res: Response) {
 
   // GeneralUtils.getFileExtension(req.file!.path);
 
-  req.params.fileType;
-
   let filePath: string = GeneralUtils.getFilePath(req.file!.path);
 
   let adapter: ValidAdapter = AdapterFactory.instance.from({

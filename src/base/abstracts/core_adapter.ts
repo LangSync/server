@@ -21,9 +21,6 @@ interface CoreAdapterInterface {
 export class CoreAdapter implements CoreAdapterInterface {
   filePath: string;
 
-  numberOfGeneratedUniqueIds: number = 0;
-  allowMultipleUniqueIds: boolean = false;
-
   get aiClient(): OpenAIClient {
     return new OpenAIClient();
   }
@@ -74,19 +71,7 @@ export class CoreAdapter implements CoreAdapterInterface {
   }
 
   generateUniqueId(): string {
-    if (
-      this.numberOfGeneratedUniqueIds >= 1 &&
-      this.allowMultipleUniqueIds === false
-    ) {
-      throw new ApiError({
-        message: "Cannot generate more than one unique id for a single file",
-        statusCode: 400,
-      });
-    }
-
     const generatedId = v4();
-
-    this.numberOfGeneratedUniqueIds++;
 
     return generatedId;
   }
